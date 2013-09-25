@@ -13,14 +13,14 @@ typedef enum {
 typedef struct 
 {
 	int ID;
-	char[] filename;
-	size_t num_bytes;
+	char* filename;
+	int num_bytes;
 	unsigned char payload[num_bytes];
 } Music_File;
 
 typedef struct
 {
-	int[] music_ids;
+	int music_ids[];
 	//Not sure how to represent host here... int for IP? Char[]?
 } Filestate;
 

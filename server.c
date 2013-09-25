@@ -1,6 +1,6 @@
-#include "data_structs.h"
+//#include "data_structs.h"
 
-public int main()
+int main()
 {
 	return 0;
 }
