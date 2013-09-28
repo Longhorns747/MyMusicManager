@@ -18,18 +18,18 @@ typedef struct
 	char* filename;
 	int num_bytes;
 	unsigned char payload[];
-} Music_File;
+} music_file;
 
 typedef struct
 {
-	struct sockaddr_in clientIP;
+	struct sockaddr_in hostIP;
 	int music_ids[];
-} Filestate;
+} filestate;
 
 typedef struct
 {
 	message_type type;
-	Filestate state;
-} Message;
+	filestate state;
+} message;
 
 #endif
