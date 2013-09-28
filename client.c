@@ -2,6 +2,8 @@
 #include <string.h>
 #include "data_structs.h"
 
+const char selections[4][5] = {"LEAVE", "LIST", "PULL", "DIFF"};
+
 int main()
 {
 	int cont = 1;
@@ -19,9 +21,16 @@ int main()
 int user_prompt()
 {
 	char selection[5];
-	printf("Please make a selection from one of the following: LIST, DIFF, PULL, LEAVE\n");
+	printf("Please make a selection from one of the following: LEAVE, LIST, PULL, DIFF\n");
 	scanf("%s", selection);
 
-	char leave[] = "LEAVE";
-	return strcmp(selection, leave);
+	int select = 0;
+
+	for(int i = 0; i < NUM_MESSAGES; i++){
+		if(!strcmp(selection, selections[i])){
+			select = i;
+		}
+	}
+
+	return select;
 }

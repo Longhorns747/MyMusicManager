@@ -6,8 +6,10 @@
 #include <arpa/inet.h>		/* for sockaddr_in and inet_addr() */
 #include <stdlib.h>
 
+int NUM_MESSAGES = 4;
+
 typedef enum {
-	LIST, PULL, DIFF, LEAVE
+	LEAVE, LIST, PULL, DIFF
 } message_type;
 
 typedef struct 
@@ -29,7 +31,5 @@ typedef struct
 	message_type type;
 	Filestate state;
 } Message;
-
-
 
 #endif
