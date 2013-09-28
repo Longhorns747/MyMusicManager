@@ -15,13 +15,13 @@ typedef struct
 	int ID;
 	char* filename;
 	int num_bytes;
-	unsigned char payload[num_bytes];
+	unsigned char payload[];
 } Music_File;
 
 typedef struct
 {
+	struct sockaddr_in clinetIP;
 	int music_ids[];
-	//Not sure how to represent host here... int for IP? Char[]?
 } Filestate;
 
 typedef struct
