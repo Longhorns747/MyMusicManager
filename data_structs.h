@@ -14,16 +14,14 @@ typedef enum {
 
 typedef struct 
 {
-	int ID;
 	char* filename;
-	int num_bytes;
-	unsigned char payload[];
+	unsigned char ID[];
 } music_file;
 
 typedef struct
 {
 	struct sockaddr_in hostIP;
-	int music_ids[];
+	music_file music_files[];
 } filestate;
 
 typedef struct
