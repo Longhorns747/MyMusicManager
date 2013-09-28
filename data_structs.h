@@ -22,7 +22,7 @@ typedef struct
 
 typedef struct
 {
-	struct sockaddr_in clinetIP;
+	struct sockaddr_in clientIP;
 	int music_ids[];
 } Filestate;
 
