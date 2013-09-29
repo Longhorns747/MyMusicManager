@@ -6,20 +6,20 @@
 #include "data_structs.h"
 #include <sys/stat.h>
 
-//short SHA_DIGEST_LENGTH = 20;
+typedef unsigned char byte;
 
-unsigned char* load_file(char fileName[], off_t fileSize)
+byte* load_file(char fileName[], off_t fileSize)
 {
 	//Open an I/O stream to the file
 	FILE* fileStream;
 	fileStream = fopen(fileName, "r");
 	int currChar = fgetc(fileStream);
-	unsigned char* fileBuf = malloc(fileSize);
+	byte* fileBuf = malloc(fileSize);
 
 	int i = 0;
 	while(currChar != EOF)
 	{
-		fileBuf[i] = (unsigned char)currChar;
+		fileBuf[i] = (byte)currChar;
 		currChar = fgetc(fileStream);
 		i++;
 	}
@@ -28,13 +28,14 @@ unsigned char* load_file(char fileName[], off_t fileSize)
 	return fileBuf;
 }
 
-unsigned char* get_unique_id(char fileName[], off_t fileSize)
+byte* get_unique_id(char fileName[], off_t fileSize)
 { 
 
-	unsigned char* payload;
+	byte* payload;
 	payload = load_file(fileName, fileSize);
 
-	unsigned char hash[20];
+	byte* hash;
+	hash = (char *) malloc(sizeof(short) * 20);
 	SHA1(payload, sizeof(payload), hash);
 	return hash;
 }

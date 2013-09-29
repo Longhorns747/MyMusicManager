@@ -15,13 +15,13 @@ typedef enum {
 typedef struct 
 {
 	char* filename;
-	unsigned char ID[];
+	unsigned char* ID;
 } music_file;
 
 typedef struct
 {
 	struct sockaddr_in hostIP;
-	music_file music_files[];
+	music_file* music_files;
 } filestate;
 
 typedef struct

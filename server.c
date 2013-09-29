@@ -20,7 +20,7 @@ int update_files(filestate* state)
 {
     struct dirent **files;
 
-    int numFiles = scandir("./", &files, one, alphasort);
+    int numFiles = scandir("./", &files, one, qsort);
     music_file *fileList;
     fileList=(music_file*) malloc(numFiles * sizeof(music_file));
 
