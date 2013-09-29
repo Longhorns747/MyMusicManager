@@ -4,6 +4,8 @@
 
 const char selections[4][5] = {"LEAVE", "LIST", "PULL", "DIFF"};
 
+int user_prompt();
+
 int main()
 {
 	int cont = 1;
