@@ -8,12 +8,7 @@
 
 typedef unsigned char byte;
 
-int update_files(filestate* state);
-void free_files(filestate* state);
 int alphasort(const struct dirent ** a, const struct dirent **b);
-int scandir(const char *dirp, struct dirent ***namelist,
-            int (*filter)(const struct dirent *),
-            int (*compar)(const struct dirent **, const struct dirent **));
 
 byte* load_file(char fileName[], off_t fileSize)
 {
@@ -89,6 +84,60 @@ int update_files(filestate* state)
 void free_files(filestate* state)
 {
     free(state->music_files);
+}
+
+//Returns the filestate of files different in state2 from state1 (state2 - state1)
+//Returns NULL if same state
+filestate* delta(filestate* state1, filestate* state2)
+{
+    int length;
+
+    //Iterate to length of smaller list
+    if(state1->numFiles < state2->numFiles)
+        length = state1->numFiles;
+    else
+        length = state2->numFiles;
+
+    int diffCount = 0;
+
+    for(int i = 0; i < length; i++){
+        if(!strcmp(state2->music_files[i].ID, state1->music_files[i].ID))
+            diffCount++;
+    }
+
+    //Need to take into account more files in state2 than state1
+    if(state2->numFiles > state1-> numFiles)
+        diffCount += state2->numFiles - state1->numFiles;
+
+    //Return null if same state
+    if(diffCount == 0)
+        return NULL;
+
+    filestate *res;
+    res->numFiles = diffCount;
+
+    music_file *fileList = malloc(sizeof(music_file) * diffCount);
+    int j = 0;
+
+    //Copy difference files over
+    for(int i = 0; i < length; i++){
+        if(!strcmp(state2->music_files[i].ID, state1->music_files[i].ID))
+        {
+            fileList[j] = state2->music_files[i];
+            j++;
+        }
+    }
+
+    //If more files in state2 than state1, need to copy extras over
+    if(j != diffCount)
+    {
+        for(int i = state1->numFiles; i < state2->numFiles; i++){
+            fileList[i] = state2->music_files[i];
+        }
+    }
+
+    res->music_files = fileList;
+    return res;
 }
 
 #endif

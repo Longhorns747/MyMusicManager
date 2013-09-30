@@ -10,13 +10,13 @@ int main()
 {
 	filestate* currState;
 	int numFiles = update_files(currState);
-	int cont = 1;
+	int userChoice = 1;
 
 	printf("Welcome to your Music Manager :D!\n");
 
-	while(cont)
+	while(userChoice)
 	{
-		cont = user_prompt();
+		userChoice = user_prompt();
 	}
 
 	free_files(currState);
