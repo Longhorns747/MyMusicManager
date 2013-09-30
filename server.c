@@ -11,16 +11,17 @@ int alphasort(const struct dirent ** a, const struct dirent **b);
 
 int main()
 {
-    filestate currState;
-    int success = update_files(&currState);
-    printf("You were... %d successful!\n", currState.numFiles);
+    filestate* currState;
+    int numFiles = update_files(currState);
 
-    for(int i = 0; i < currState.numFiles; i++){
-        music_file* currFile = currState.music_files + (i * sizeof(music_file));
-        printf("File%d: %s", i, currFile->filename);
+    printf("You were... %d successful!\n", numFiles);
+
+    for(int i = 0; i < numFiles; i++){
+        music_file currFile = currState->music_files[i];
+        printf("File%d: %s\n", i, currFile.filename);
     }
 
-    free_files(&currState);
+    free_files(currState);
 	return 0;
 }
 
@@ -66,5 +67,4 @@ int update_files(filestate* state)
 void free_files(filestate* state)
 {
     free(state->music_files);
-    free(state);
 }
