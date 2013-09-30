@@ -1,6 +1,6 @@
-#include <stdio.h>
 #include <string.h>
 #include "data_structs.h"
+#include "file_util.h"
 
 const char selections[4][5] = {"LEAVE", "LIST", "PULL", "DIFF"};
 
@@ -8,6 +8,8 @@ int user_prompt();
 
 int main()
 {
+	filestate* currState;
+	int numFiles = update_files(currState);
 	int cont = 1;
 
 	printf("Welcome to your Music Manager :D!\n");
@@ -17,6 +19,7 @@ int main()
 		cont = user_prompt();
 	}
 
+	free_files(currState);
 	return 0;
 }
 
