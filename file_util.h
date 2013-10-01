@@ -37,7 +37,7 @@ byte* get_unique_id(char fileName[], off_t fileSize)
 	payload = load_file(fileName, fileSize);
 
 	byte* hash;
-	hash = (char *) malloc(sizeof(short) * 20);
+	hash = (char *) malloc(sizeof(char) * 20);
 	SHA1(payload, sizeof(payload), hash);
 	return hash;
 }
