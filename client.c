@@ -1,6 +1,7 @@
 #include <string.h>
 #include "data_structs.h"
 #include "file_util.h"
+#include "networking_util.h"
 
 const char selections[4][5] = {"LEAVE", "LIST", "PULL", "DIFF"};
 
@@ -11,6 +12,12 @@ int main()
 {
 	int userChoice = 1;
 
+	//Set up a connection to the server
+	sockaddr_in serverAddr;
+	setup_addr("130.207.114.21", &serverAddr);
+	int sock = setup_connection(&serverAddr);
+
+	printf("Connection to server established\n");
 	printf("Welcome to your Music Manager :D!\n");
 
 	while(userChoice)
@@ -19,6 +26,7 @@ int main()
 		message* msg;
 		create_message(msg, userChoice);
 		printf("Created message with type: %d file 3: %s\n", msg->type, msg->state->music_files[2].filename);
+
 		free_files(msg->state);
 	}
 	

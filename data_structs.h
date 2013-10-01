@@ -2,9 +2,9 @@
 #define DATA_STRUCTS_H_INCLUDED
 
 #include <stdio.h>		    /* for printf() and fprintf() */
-#include <sys/socket.h>		/* for socket(), connect(), send(), and recv() */
-#include <arpa/inet.h>		/* for sockaddr_in and inet_addr() */
 #include <stdlib.h>
+#include <sys/socket.h>     /* for socket(), connect(), send(), and recv() */
+#include <arpa/inet.h>      /* for sockaddr_in and inet_addr() */
 
 int NUM_MESSAGES = 4;
 

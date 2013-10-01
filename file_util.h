@@ -3,12 +3,16 @@
  
 #include <openssl/sha.h>
 #include <dirent.h>
-#include "data_structs.h"
 #include <sys/stat.h>
+#include "data_structs.h"
 
 typedef unsigned char byte;
 
 int alphasort(const struct dirent ** a, const struct dirent **b);
+int update_files(filestate* state);
+void free_files(filestate* state);
+filestate* delta(filestate* receiver, filestate* sender);
+
 
 byte* load_file(char fileName[], off_t fileSize)
 {
