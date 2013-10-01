@@ -100,27 +100,22 @@ filestate* delta(filestate* receiver, filestate* sender)
     int deltaIdx = 0;
 
     int comparison;
+
     while(senderIdx < senderLength && receiverIdx < receiverLength){
+    	//compare music file IDs
+            comparison = strcmp(sender->music_files[senderIdx].ID, receiver->music_files[receiverIdx].ID);
 
-	//compare music file IDs
-        comparison = strcmp(sender->music_files[senderIdx].ID, receiver->music_files[receiverIdx].ID);
-
-	if(comparison == 0)
-	    senderIdx++;
-	else if (comparison < 0)
-	    receiverIdx++;
-	else{
-            diffCount++;	      
-	}
+        	if(comparison == 0)
+        	    senderIdx++;
+        	else if (comparison < 0)
+        	    receiverIdx++;
+        	else
+                diffCount++;
     }
 
     //add the extra elements from the sender 
-    if (senderIdx < senderLength){
-	diffCount++;
-    }
-
-
-
+    if (senderIdx < senderLength)
+	   diffCount++;
 
     //allocate space for difference of files
     music_file *fileList = malloc(sizeof(music_file) * diffCount);	
@@ -131,64 +126,26 @@ filestate* delta(filestate* receiver, filestate* sender)
     deltaIdx = 0;
 
     while(senderIdx < senderLength && receiverIdx < receiverLength){
-
-	//compare music file IDs
+    	//compare music file IDs
         comparison = strcmp(sender->music_files[senderIdx].ID, receiver->music_files[receiverIdx].ID);
 
-	if(comparison == 0)
-	    senderIdx++;
-	else if (comparison < 0)
-	    receiverIdx++;
-	else{
-            fileList[deltaIdx++] = sender->music_files[senderIdx++];	      
-	}
+    	if(comparison == 0)
+    	    senderIdx++;
+    	else if (comparison < 0)
+    	    receiverIdx++;
+    	else
+            fileList[deltaIdx++] = sender->music_files[senderIdx++];
     }
 
     //add the extra elements from the sender 
-    if (senderIdx < senderLength){
-	fileList[deltaIdx++] = sender->music_files[senderIdx++];
-    }
+    if (senderIdx < senderLength)
+	   fileList[deltaIdx++] = sender->music_files[senderIdx++];
 
+    filestate *res;
+    res->numFiles = diffCount;
 
-
-
-
-
-
-
-    //Need to take into account more files in sender than receiver 
-    //if(sender->numFiles > receiver -> numFiles)
-    //    diffCount += sender->numFiles - receiver ->numFiles;
-
-    //Return null if same state
-    //if(diffCount == 0)
-    //    return NULL;
-
-    //filestate *res;
-    //res->numFiles = diffCount;
-
-    //music_file *fileList = malloc(sizeof(music_file) * diffCount);
-    //int j = 0;
-
-    //Copy difference files over
-    //for(int i = 0; i < length; i++){
-    //    if(!strcmp(sender->music_files[i].ID, receiver ->music_files[i].ID))
-    //    {
-    //        fileList[j] = sender->music_files[i];
-    //        j++;
-    //    }
-    //}
-
-    //If more files in sender than receiver , need to copy extras over
-    //if(j != diffCount)
-    //{
-    //    for(int i = receiver ->numFiles; i < sender->numFiles; i++){
-    //        fileList[i] = sender->music_files[i];
-    //    }
-    //}
-
-    //res->music_files = fileList;
-    return fileList;
+    res->music_files = fileList;
+    return res;
 }
 
 #endif
