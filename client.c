@@ -5,11 +5,10 @@
 const char selections[4][5] = {"LEAVE", "LIST", "PULL", "DIFF"};
 
 int user_prompt();
+void create_message(message* msg, int msgType);
 
 int main()
 {
-	filestate* currState;
-	int numFiles = update_files(currState);
 	int userChoice = 1;
 
 	printf("Welcome to your Music Manager :D!\n");
@@ -17,9 +16,12 @@ int main()
 	while(userChoice)
 	{
 		userChoice = user_prompt();
+		message* msg;
+		create_message(msg, userChoice);
+		printf("Created message with type: %d file 3: %s\n", msg->type, msg->state->music_files[2].filename);
+		free_files(msg->state);
 	}
-
-	free_files(currState);
+	
 	return 0;
 }
 
@@ -38,4 +40,13 @@ int user_prompt()
 	}
 
 	return select;
+}
+
+void create_message(message* msg, int msgType)
+{
+	filestate currState;
+	int numFiles = update_files(&currState);
+
+	msg->state = &currState;
+	msg->type = (message_type) msgType;
 }

@@ -28,7 +28,7 @@ typedef struct
 typedef struct
 {
 	message_type type;
-	filestate state;
+	filestate* state;
 } message;
 
 #endif
