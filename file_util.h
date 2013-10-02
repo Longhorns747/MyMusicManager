@@ -94,40 +94,30 @@ void free_files(filestate* state)
 //Returns NULL if same state
 filestate* delta(filestate* receiver, filestate* sender)
 {
+    filestate *res;
     int senderLength = sender->numFiles;
     int receiverLength = receiver->numFiles;
 
-    int diffCount = 0;
+    //if the receiver has no files, go ahead and send everything
+    if(receiverLength == 0){
+	res->numFiles = senderLength;
+        res->music_files = sender->music_files;
+	return res;
+    }
+    //if the sender has no files, nothing can be sent
+    if(senderLength == 0){
+	res->numFiles = 0;
+	return res;
+    }   	
 
     int senderIdx = 0;
     int receiverIdx = 0;
     int deltaIdx = 0;
 
+    int fileCount = 0;
     int comparison;
 
-    while(senderIdx < senderLength && receiverIdx < receiverLength){
-    	//compare music file IDs
-            comparison = strcmp(sender->music_files[senderIdx].ID, receiver->music_files[receiverIdx].ID);
-
-        	if(comparison == 0)
-        	    senderIdx++;
-        	else if (comparison < 0)
-        	    receiverIdx++;
-        	else
-                diffCount++;
-    }
-
-    //add the extra elements from the sender 
-    while (senderIdx < senderLength)
-	   diffCount++;
-
-    //allocate space for difference of files
-    music_file *fileList = malloc(sizeof(music_file) * diffCount);	
-    
-    //Find delta
-    senderIdx = 0;
-    receiverIdx = 0;	
-    deltaIdx = 0;
+    filestate* fileList; 
 
     while(senderIdx < senderLength && receiverIdx < receiverLength){
     	//compare music file IDs
@@ -137,17 +127,21 @@ filestate* delta(filestate* receiver, filestate* sender)
     	    senderIdx++;
     	else if (comparison < 0)
     	    receiverIdx++;
-    	else
+    	else{
+ 	    fileCount++;	
+            fileList = (filestate*) realloc(fileList*, sizeof(filestate)*fileCount);  
             fileList[deltaIdx++] = sender->music_files[senderIdx++];
+	}
+	    
     }
 
     //add the extra elements from the sender 
-    while (senderIdx < senderLength)
-	   fileList[deltaIdx++] = sender->music_files[senderIdx++];
-
-    filestate *res;
-    res->numFiles = diffCount;
-
+    while (senderIdx < senderLength){
+	fileList[deltaIdx++] = sender->music_files[senderIdx++];
+	filecount++;
+    }
+  
+    res->numFiles = fileCount;
     res->music_files = fileList;
     return res;
 }
