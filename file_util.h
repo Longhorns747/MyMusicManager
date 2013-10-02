@@ -117,7 +117,7 @@ filestate* delta(filestate* receiver, filestate* sender)
     int fileCount = 0;
     int comparison;
 
-    filestate* fileList; 
+    music_file* fileList; 
 
     while(senderIdx < senderLength && receiverIdx < receiverLength){
     	//compare music file IDs
@@ -129,7 +129,7 @@ filestate* delta(filestate* receiver, filestate* sender)
     	    receiverIdx++;
     	else{
  	    fileCount++;	
-            fileList = (filestate*) realloc(fileList*, sizeof(filestate)*fileCount);  
+            fileList = (music_file*) realloc(&fileList, sizeof(music_file)*fileCount);  
             fileList[deltaIdx++] = sender->music_files[senderIdx++];
 	}
 	    
@@ -138,7 +138,7 @@ filestate* delta(filestate* receiver, filestate* sender)
     //add the extra elements from the sender 
     while (senderIdx < senderLength){
 	fileList[deltaIdx++] = sender->music_files[senderIdx++];
-	filecount++;
+	fileCount++;
     }
   
     res->numFiles = fileCount;
