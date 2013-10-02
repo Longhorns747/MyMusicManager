@@ -131,8 +131,6 @@ filestate* delta(filestate* receiver, filestate* sender)
     	else{
 	    fileCount++;	
             fileList[deltaIdx++] = sender->music_files[senderIdx++];
-	}
-	    
     }
 
     //add the extra elements from the sender 
