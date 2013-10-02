@@ -118,7 +118,7 @@ filestate* delta(filestate* receiver, filestate* sender)
     }
 
     //add the extra elements from the sender 
-    if (senderIdx < senderLength)
+    while (senderIdx < senderLength)
 	   diffCount++;
 
     //allocate space for difference of files
@@ -142,7 +142,7 @@ filestate* delta(filestate* receiver, filestate* sender)
     }
 
     //add the extra elements from the sender 
-    if (senderIdx < senderLength)
+    while (senderIdx < senderLength)
 	   fileList[deltaIdx++] = sender->music_files[senderIdx++];
 
     filestate *res;
