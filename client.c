@@ -39,6 +39,10 @@ int user_prompt()
 	printf("Please make a selection from one of the following: LEAVE, LIST, PULL, DIFF\n");
 	scanf("%s", selection);
 
+	//***
+	//What happens on bad user input? -SC
+        //***
+
 	int select = 0;
 
 	for(int i = 0; i < NUM_MESSAGES; i++){
