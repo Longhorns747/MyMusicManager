@@ -31,6 +31,8 @@ int main()
 
     while(1){
         message* msg;
+        printf("Ready to recieve messages!\n", sock);
+        
         rcv_message(msg, sock);
         printf("Whoa a message! Type: %d\n", msg->type);
     }
@@ -59,5 +61,5 @@ void setup_serveraddr(sockaddr_in* serverAddr)
     //Protocol family, address, port
     serverAddr->sin_family = AF_INET;
     serverAddr->sin_addr.s_addr = htonl(INADDR_ANY);
-    serverAddr->sin_port = PORT;
+    serverAddr->sin_port = htons(PORT);
 }
