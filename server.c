@@ -32,11 +32,7 @@ int main()
     while(1){
         message* msg;
         rcv_message(msg, sock);
-
-        if(*msg == NULL)
-            continue;
-        else
-            printf("Whoa a message! Type: %d\n", msg->type);
+        printf("Whoa a message! Type: %d\n", msg->type);
     }
     
     return 0;

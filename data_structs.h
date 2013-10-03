@@ -8,7 +8,7 @@
 #include <stdbool.h>
 
 int NUM_MESSAGES = 4;
-const char selections[NUM_MESSAGES][5] = {"LEAVE", "LIST", "PULL", "DIFF"};
+char selections[4][5] = {"LEAVE", "LIST", "PULL", "DIFF"};
 
 typedef enum {
 	LEAVE, LIST, PULL, DIFF
