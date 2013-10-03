@@ -3,8 +3,6 @@
 #include "file_util.h"
 #include "networking_util.h"
 
-const char selections[4][5] = {"LEAVE", "LIST", "PULL", "DIFF"};
-
 int user_prompt();
 void create_message(message* msg, int msgType);
 
@@ -25,7 +23,7 @@ int main()
 		userChoice = user_prompt();
 		message* msg;
 		create_message(msg, userChoice);
-		printf("Created message with type: %d\n", msg->type);
+		printf("Created message with type: %s\n", selections[msg->type]);
 		
 		send_message(msg, sock);
 

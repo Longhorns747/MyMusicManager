@@ -4,13 +4,17 @@
 #include <sys/socket.h>     /* for socket(), connect(), send(), and recv() */
 #include <arpa/inet.h>      /* for sockaddr_in and inet_addr() */
 #include <string.h>
+#include "data_structs.h"
 
 #define PORT 2222
+#define RCVBUFSIZE 1500
+
 typedef struct sockaddr_in sockaddr_in;
 
 int setup_connection(sockaddr_in* address);
 void setup_addr(char* IPaddr, sockaddr_in *address);
 void send_message(message* msg, int sock);
+void rcv_message(message* message, int sock);
 
 //Set up the address structure for a given address
 void setup_addr(char* IPaddr, sockaddr_in *address)
@@ -51,13 +55,74 @@ int setup_connection(sockaddr_in* address)
 
 void send_message(message* message, int sock)
 {
-    int msgLength;
 
-    //send msg to server 
-    msgLength = sizeof(*message);
+    //Prepare metadata
+    metadata md;
+    int msgLength;
     
+    msgLength = sizeof(*message);
+    md.size = msgLength;
+    md.last = true;
+
+    int mdlength;
+    mdlength = sizeof(md);
+
+    //Send the metadata
+    if(send(sock, &md, mdlength, 0) != mdlength)
+        perror("send() sent unexpected number of bytes for metadata");
+    
+    //Send msg
     if(send(sock, message, msgLength, 0) != msgLength)
-        perror("send() sent unexpected number of bytes");
+        perror("send() sent unexpected number of bytes for message");
+}
+
+void rcv_message(message* message, int sock)
+{
+    sockaddr_in clientAddr;
+    unsigned int clntLen;
+    int clientSock;
+    byte rcvBuf[RCVBUFSIZE];
+
+    /* Accept incoming connection */
+    clntLen = sizeof(clientAddr);
+    clientSock = accept(sock, (struct sockaddr*) &clientAddr, &clntLen);
+
+    if(clientSock < 0){
+        printf("accept() failed :(\n");
+        exit(1);
+    }
+
+    printf("Client accepted... \n");
+
+    //Recieve metadata from client
+    ssize_t bytesRecieved = recv(clientSock, rcvBuf, RCVBUFSIZE, 0);
+
+    if(bytesRecieved < sizeof(metadata)){
+        printf("Did not recieve all of metadata\n");
+        exit(1);
+    }
+
+    //Remake the metadata struct
+    metadata md;
+    memcpy(&md, rcvBuf, sizeof(md));
+
+    int msgSize = md.size;
+    if(!md.last)
+    {
+        printf("Metadata does not have last set... What were you thinking???");
+        exit(1);
+    }
+
+    //Let's recieve the message!
+    byte messageBuf[msgSize];
+    int totalBytes = 0;
+
+    while(totalBytes < msgSize){
+        bytesRecieved = recv(clientSock, messageBuf, msgSize, 0);
+        totalBytes += bytesRecieved;
+    }
+    
+    memcpy(message, messageBuf, msgSize);
 }
 
 #endif
