@@ -5,12 +5,19 @@
 #include <stdlib.h>
 #include <sys/socket.h>     /* for socket(), connect(), send(), and recv() */
 #include <arpa/inet.h>      /* for sockaddr_in and inet_addr() */
+#include <stdbool.h>
 
 int NUM_MESSAGES = 4;
 
 typedef enum {
 	LEAVE, LIST, PULL, DIFF
 } message_type;
+
+typedef struct
+{
+	bool last;
+	int size;
+} metadata;
 
 typedef struct 
 {

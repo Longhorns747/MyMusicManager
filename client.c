@@ -20,25 +20,18 @@ int main()
 	printf("Connection to server established\n");
 	printf("Welcome to your Music Manager :D!\n");
 
-	int msgLength;
 	while(userChoice)
 	{
 		userChoice = user_prompt();
 		message* msg;
 		create_message(msg, userChoice);
-		printf("Created message with type: %d file 3: %s\n", msg->type, msg->state->music_files[2].filename);
-
-		//send msg to server 
-		msgLength = sizeof(message);
-	        if(send(sock, msg, msgLength, 0) != msgLength)
-		    perror("send() sent unexpected number of bytes");
+		printf("Created message with type: %d\n", msg->type);
+		
+		send_message(msg, sock);
 
 		//receive response
 		//This should be in a loop. How do we know when to stop receiving data?
 		//int numBytes = recv(sock, rcvBuf, RCVBUFSIZE, 0);
-	
-		
-
 
 		free_files(msg->state);
 	}
@@ -54,7 +47,7 @@ int user_prompt()
 
 	//***
 	//What happens on bad user input? -SC
-        //***
+    //***
 
 	int select = 0;
 

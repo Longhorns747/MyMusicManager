@@ -10,6 +10,7 @@ typedef struct sockaddr_in sockaddr_in;
 
 int setup_connection(sockaddr_in* address);
 void setup_addr(char* IPaddr, sockaddr_in *address);
+void send_message(message* msg, int sock);
 
 //Set up the address structure for a given address
 void setup_addr(char* IPaddr, sockaddr_in *address)
@@ -46,6 +47,17 @@ int setup_connection(sockaddr_in* address)
     }
 
     return clientSock;
+}
+
+void send_message(message* message, int sock)
+{
+    int msgLength;
+
+    //send msg to server 
+    msgLength = sizeof(*message);
+    
+    if(send(sock, message, msgLength, 0) != msgLength)
+        perror("send() sent unexpected number of bytes");
 }
 
 #endif

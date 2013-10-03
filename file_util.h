@@ -91,7 +91,6 @@ void free_files(filestate* state)
 }
 
 //Returns the filestate of files different in sender from receiver  (sender - receiver )
-//Returns NULL if same state
 filestate* delta(filestate* receiver, filestate* sender)
 {
     filestate *res;
@@ -100,14 +99,15 @@ filestate* delta(filestate* receiver, filestate* sender)
 
     //if the receiver has no files, go ahead and send everything
     if(receiverLength == 0){
-	res->numFiles = senderLength;
+	    res->numFiles = senderLength;
         res->music_files = sender->music_files;
-	return res;
+	    return res;
     }
+
     //if the sender has no files, nothing can be sent
     if(senderLength == 0){
-	res->numFiles = 0;
-	return res;
+    	res->numFiles = 0;
+    	return res;
     }   	
 
     int senderIdx = 0;
@@ -129,14 +129,15 @@ filestate* delta(filestate* receiver, filestate* sender)
     	else if (comparison < 0)
     	    receiverIdx++;
     	else{
-	    fileCount++;	
+	        fileCount++;	
             fileList[deltaIdx++] = sender->music_files[senderIdx++];
+        }
     }
 
     //add the extra elements from the sender 
     while(senderIdx < senderLength){
-	fileCount++;
-	fileList[deltaIdx++] = sender->music_files[senderIdx++];
+    	fileCount++;
+    	fileList[deltaIdx++] = sender->music_files[senderIdx++];
     }
   
     //reallocate unused space in fileList
