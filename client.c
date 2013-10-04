@@ -23,6 +23,7 @@ int main()
 	{
 		userChoice = user_prompt();
 		message* msg;
+		//payload will be a filestate in this case 
 		byte* payload = create_message(msg, userChoice);
 		printf("Created message with type: %s\n", selections[msg->type]);
 		
@@ -36,16 +37,17 @@ int main()
 			int whatsAGoodNameForThis = recv(sock, metadata, METADATASIZE, 0);
 	
 			int numBytes = metadata->num_bytes;
-			message_type type = metadata->type;
-			lastPacket = metadata->last_packet;
-
+			//message_type type = metadata->type;
+			lastPacket = metadata->last_message;
+				
 			//accept mp3 file data
-			if(type == DIFF){
-
+			if(type == PULL){
+			
 			    //TODO: handle filename. FIlename should be at the beginning of each mp3 file payload 	
-			    file[numBytes];
+			    char file[numBytes]; //maybe make this a file type?
 			    int numBytesRecv = 0;
-			    while(numBytesRecv < (numBytes-BUFSIZE){
+		            byte rcvMsg;
+			    while(numBytesRecv < (numBytes-BUFSIZE)){
 				recv(sock, rcvMsg, BUFSIZE, 0);
 				memcopy(file[numBytesRecv], rcvMsg, BUFSIZE);
 			    }
@@ -55,10 +57,16 @@ int main()
 			
 			    //at this point we have the entire music file. Store it in memory somehow
 			}
-			if(type == LIST){
+			else if(type == LIST || DIFF){
 			    char* filename;
 			    //TODO: call recv, and use that buffer to print out each string name.
-			    //strings will be separated by /0	
+			    //strings will be separated by /0
+			}
+			else{//type == LEAVE
+			    printf("Now exiting.\n");
+
+			}
+				
 		}
 	
 
@@ -90,12 +98,13 @@ int user_prompt()
 	return select;
 }
 
-byte* create_message(message* msg, int msgType)
+filestate* create_message(message* msg, int msgType)
 {
 	filestate currState;
 	msg->num_bytes = update_files(&currState);//TODO: THIS NEEDS TO RETURN NUM BYTES, NOT NUM FILES
 	msg->filename_length = 0; //Not used by client
 	msg->type = (message_type) msgType;
-	return currState;
+	msg->last_message = 1;
+	return &currState;
 
 }

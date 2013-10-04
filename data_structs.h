@@ -39,7 +39,6 @@ typedef struct
 	int num_bytes; //The number of bytes to be sent
 	int last_message; //Is this the last message from the sender?
 	int filename_length; //Filename length, if a filename exists
-	char* payload; //Pointer to the data payload, if any
 } message;
 
 #endif

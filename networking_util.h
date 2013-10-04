@@ -14,7 +14,7 @@ typedef struct sockaddr_in sockaddr_in;
 
 int setup_connection(sockaddr_in* address);
 void setup_addr(char* IPaddr, sockaddr_in *address);
-void send_message(message* msg, int sock);
+void send_message(message* message, byte* payload, int sock);
 void rcv_message(message* message, int sock);
 
 //Set up the address structure for a given address
@@ -54,7 +54,7 @@ int setup_connection(sockaddr_in* address)
     return clientSock;
 }
 
-void send_message(message* message, int sock)
+void send_message(message* message, byte* payload, int sock)
 {
 
     byte metadata_buffer[METADATASIZE];	
@@ -65,13 +65,14 @@ void send_message(message* message, int sock)
     //memcpy(buffer[12], (void*)message->filename_length, sizeof(int)); 	
 
     //Pack the metadata buffer
-    metadata_buffer[0] = message->type;
-    metadata_buffer[4] = message->num_bytes;
-    metadata_buffer[8] = message->last_message;
-    metadata_buffer[12] = message->filename_length;
+    //metadata_buffer[0] = message->type;
+    //metadata_buffer[4] = message->num_bytes;
+    //metadata_buffer[8] = message->last_message;
+    //metadata_buffer[12] = message->filename_length;
+
 
     //Send the metadata
-    if(send(sock, metadata_buffer, METADATASIZE, 0) != METADATASIZE)
+    if(send(sock, &message, METADATASIZE, 0) != METADATASIZE)
         perror("send() sent unexpected number of bytes for metadata");	
 
     byte buffer[BUFSIZE];	
@@ -79,17 +80,16 @@ void send_message(message* message, int sock)
     int remainingBytes = message->num_bytes;
     int offset = 0;
     while(remainingBytes > BUFSIZE){
-	if(send(sock, message->payload[BUFSIZE*offset], BUFSIZE, 0) != BUFSIZE)
+	if(send(sock, payload[BUFSIZE*offset], BUFSIZE, 0) != BUFSIZE)
 	    perror("send() sent unexpected number of bytes of data");
 	remainingBytes = remainingBytes - BUFSIZE;
 	offset=offset+1;				
     }
 
     //Send the remainder of the payload
-    if(send(sock, message->payload[BUFSIZE*offset], remainingBytes, 0) != remainingBytes)
+    if(send(sock, payload[BUFSIZE*offset], remainingBytes, 0) != remainingBytes)
 	perror("send() sent unexpected number of bytes of data");	
     
-
 }
 
 void rcv_message(message* message, int clientSock)
