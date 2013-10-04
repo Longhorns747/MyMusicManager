@@ -75,20 +75,22 @@ void send_message(message* message, byte* payload, int sock)
     if(send(sock, &message, METADATASIZE, 0) != METADATASIZE)
         perror("send() sent unexpected number of bytes for metadata");	
 
-    byte buffer[BUFSIZE];	
+    byte buffer[BUFSIZE];
+
     //Send the payload 1500 (BUFSIZE) bytes at a time
     int remainingBytes = message->num_bytes;
     int offset = 0;
+
     while(remainingBytes > BUFSIZE){
-	if(send(sock, payload[BUFSIZE*offset], BUFSIZE, 0) != BUFSIZE)
-	    perror("send() sent unexpected number of bytes of data");
-	remainingBytes = remainingBytes - BUFSIZE;
-	offset=offset+1;				
+	   if(send(sock, &payload[BUFSIZE*offset], BUFSIZE, 0) != BUFSIZE)
+	       perror("send() sent unexpected number of bytes of data");
+	   remainingBytes = remainingBytes - BUFSIZE;
+	   offset=offset+1;				
     }
 
     //Send the remainder of the payload
-    if(send(sock, payload[BUFSIZE*offset], remainingBytes, 0) != remainingBytes)
-	perror("send() sent unexpected number of bytes of data");	
+    if(send(sock, &payload[BUFSIZE*offset], remainingBytes, 0) != remainingBytes)
+	   perror("send() sent unexpected number of bytes of data");	
     
 }
 
@@ -103,9 +105,6 @@ void rcv_message(message* message, int clientSock)
         printf("Did not recieve all of metadata\n");
         exit(1);
     }
-
-
-
 
     //Remake the metadata struct
     metadata md;

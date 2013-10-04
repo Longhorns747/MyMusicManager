@@ -50,6 +50,7 @@ int main()
         
         rcv_message(&msg, clientSock);
         printf("Whoa a message! Type: %d\n", msg.type);
+
     }
     
     return 0;
