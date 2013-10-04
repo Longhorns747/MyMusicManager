@@ -18,25 +18,56 @@ int main()
 	printf("Connection to server established\n");
 	printf("Welcome to your Music Manager :D!\n");
 
+	int lastPacket = 1;
 	while(userChoice)
 	{
 		userChoice = user_prompt();
 		message* msg;
-		create_message(msg, userChoice);
+		byte* payload = create_message(msg, userChoice);
 		printf("Created message with type: %s\n", selections[msg->type]);
 		
-		send_message(msg, sock);
+		send_message(&msg, &payload, sock);
+		//free_files(msg);
 
-		//receive response
-		//This should be in a loop. How do we know when to stop receiving data?
-		//int numBytes = recv(sock, rcvBuf, RCVBUFSIZE, 0);
+		//keep accepting metadata packets after a reponse until a last packet flag
+		while(!lastPacket){
+			//receive metadata response
+			message* metadata;
+			int whatsAGoodNameForThis = recv(sock, metadata, METADATASIZE, 0);
+	
+			int numBytes = metadata->num_bytes;
+			message_type type = metadata->type;
+			lastPacket = metadata->last_packet;
 
-		//free_files(msg->state);
+			//accept mp3 file data
+			if(type == DIFF){
+
+			    //TODO: handle filename. FIlename should be at the beginning of each mp3 file payload 	
+			    file[numBytes];
+			    int numBytesRecv = 0;
+			    while(numBytesRecv < (numBytes-BUFSIZE){
+				recv(sock, rcvMsg, BUFSIZE, 0);
+				memcopy(file[numBytesRecv], rcvMsg, BUFSIZE);
+			    }
+			    //grab the rest of the bytes
+			    recv(sock, rcvMsg, BUFSIZE - numBytesRecv, 0);
+			    memcopy(file[numBytesRecv], rcvMsg, BUFSIZE - numBytesRecv);
+			
+			    //at this point we have the entire music file. Store it in memory somehow
+			}
+			if(type == LIST){
+			    char* filename;
+			    //TODO: call recv, and use that buffer to print out each string name.
+			    //strings will be separated by /0	
+		}
+	
 
 	}
 	
 	return 0;
 }
+
+
 
 int user_prompt()
 {
@@ -59,12 +90,12 @@ int user_prompt()
 	return select;
 }
 
-void create_message(message* msg, int msgType)
+byte* create_message(message* msg, int msgType)
 {
 	filestate currState;
-	int numFiles = update_files(&currState);
+	msg->num_bytes = update_files(&currState);//TODO: THIS NEEDS TO RETURN NUM BYTES, NOT NUM FILES
 	msg->filename_length = 0; //Not used by client
-	msg->payload = &currState; //This should be a pointer to payload. Is this right?
 	msg->type = (message_type) msgType;
+	return currState;
 
 }
