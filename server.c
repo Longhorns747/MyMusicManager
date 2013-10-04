@@ -29,12 +29,27 @@ int main()
         exit(1);
     }
 
+    /* Accept incoming connection */
+    sockaddr_in clientAddr;
+    unsigned int clntLen;
+    int clientSock;
+
+    clntLen = sizeof(clientAddr);
+    clientSock = accept(sock, (struct sockaddr*) &clientAddr, &clntLen);
+
+    if(clientSock < 0){
+        printf("accept() failed :(\n");
+        exit(1);
+    }
+
+    printf("Client accepted... \n");
+
     while(1){
-        message* msg;
+        message msg;
         printf("Ready to recieve messages!\n", sock);
         
-        rcv_message(msg, sock);
-        printf("Whoa a message! Type: %d\n", msg->type);
+        rcv_message(&msg, clientSock);
+        printf("Whoa a message! Type: %d\n", msg.type);
     }
     
     return 0;

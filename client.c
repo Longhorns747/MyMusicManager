@@ -31,7 +31,7 @@ int main()
 		//This should be in a loop. How do we know when to stop receiving data?
 		//int numBytes = recv(sock, rcvBuf, RCVBUFSIZE, 0);
 
-		free_files(msg->state);
+		//free_files(msg->state);
 	}
 	
 	return 0;

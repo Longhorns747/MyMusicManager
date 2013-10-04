@@ -76,23 +76,9 @@ void send_message(message* message, int sock)
         perror("send() sent unexpected number of bytes for message");
 }
 
-void rcv_message(message* message, int sock)
+void rcv_message(message* message, int clientSock)
 {
-    sockaddr_in clientAddr;
-    unsigned int clntLen;
-    int clientSock;
     byte rcvBuf[RCVBUFSIZE];
-
-    /* Accept incoming connection */
-    clntLen = sizeof(clientAddr);
-    clientSock = accept(sock, (struct sockaddr*) &clientAddr, &clntLen);
-
-    if(clientSock < 0){
-        printf("accept() failed :(\n");
-        exit(1);
-    }
-
-    printf("Client accepted... \n");
 
     //Recieve metadata from client
     ssize_t bytesRecieved = recv(clientSock, rcvBuf, RCVBUFSIZE, 0);
@@ -122,7 +108,9 @@ void rcv_message(message* message, int sock)
         totalBytes += bytesRecieved;
     }
     
+    printf(":|\n");
     memcpy(message, messageBuf, msgSize);
+    printf(":3\n");
 }
 
 #endif
