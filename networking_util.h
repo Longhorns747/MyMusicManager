@@ -8,7 +8,7 @@
 
 #define PORT 2222
 #define BUFSIZE 1500
-#define HEADERSIZE 16
+#define METADATASIZE 16
 
 typedef struct sockaddr_in sockaddr_in;
 
@@ -57,7 +57,7 @@ int setup_connection(sockaddr_in* address)
 void send_message(message* message, int sock)
 {
 
-    byte buffer[BUFSIZE];	
+    byte metadata_buffer[METADATASIZE];	
     
     //memcpy(buffer[0], (void*)message->type, sizeof(int));
     //memcpy(buffer[4], (void*)message->num_bytes, sizeof(int));
@@ -65,28 +65,29 @@ void send_message(message* message, int sock)
     //memcpy(buffer[12], (void*)message->filename_length, sizeof(int)); 	
 
     //Pack the metadata buffer
-    buffer[0] = message->type;
-    buffer[4] = message->num_bytes;
-    buffer[8] = message->last_message;
-    buffer[12] = message->filename_length;
+    metadata_buffer[0] = message->type;
+    metadata_buffer[4] = message->num_bytes;
+    metadata_buffer[8] = message->last_message;
+    metadata_buffer[12] = message->filename_length;
 
     //Send the metadata
-    if(send(sock, buffer, BUFSIZE, 0) != BUFSIZE)
+    if(send(sock, metadata_buffer, METADATASIZE, 0) != METADATASIZE)
         perror("send() sent unexpected number of bytes for metadata");	
 
-    //Send the payload 1500 bytes at a time
-    int bytesWaiting = message->num_bytes;
+    byte buffer[BUFSIZE];	
+    //Send the payload 1500 (BUFSIZE) bytes at a time
+    int remainingBytes = message->num_bytes;
     int offset = 0;
-    while(bytesWaiting > BUFSIZE){
+    while(remainingBytes > BUFSIZE){
 	if(send(sock, message->payload[BUFSIZE*offset], BUFSIZE, 0) != BUFSIZE)
 	    perror("send() sent unexpected number of bytes of data");
-	bytesWaiting = bytesWaiting - BUFSIZE;
+	remainingBytes = remainingBytes - BUFSIZE;
 	offset=offset+1;				
     }
 
     //Send the remainder of the payload
-    if(send(sock, message->payload[BUFSIZE*offset], bytesWaiting, 0) != bytesWaiting)
-	        perror("send() sent unexpected number of bytes of data");	
+    if(send(sock, message->payload[BUFSIZE*offset], remainingBytes, 0) != remainingBytes)
+	perror("send() sent unexpected number of bytes of data");	
     
 
 }
