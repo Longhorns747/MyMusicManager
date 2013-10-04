@@ -4,17 +4,18 @@
 #include <sys/socket.h>     /* for socket(), connect(), send(), and recv() */
 #include <arpa/inet.h>      /* for sockaddr_in and inet_addr() */
 #include <string.h>
+#include "tpl.h"
 #include "data_structs.h"
 
 #define PORT 2222
 #define BUFSIZE 1500
-#define METADATASIZE 16
+#define MESSAGESIZE sizeof(message)
 
 typedef struct sockaddr_in sockaddr_in;
 
 int setup_connection(sockaddr_in* address);
 void setup_addr(char* IPaddr, sockaddr_in *address);
-void send_message(message* message, byte* payload, int sock);
+void send_payload(message* message, byte* payload, int sock);
 void rcv_message(message* message, int sock);
 
 //Set up the address structure for a given address
@@ -54,25 +55,25 @@ int setup_connection(sockaddr_in* address)
     return clientSock;
 }
 
-void send_message(message* message, byte* payload, int sock)
+void send_message(message* message, int sock)
 {
+    byte* buffer;
+    size_t len;
 
-    byte metadata_buffer[METADATASIZE];	
-    
-    //memcpy(buffer[0], (void*)message->type, sizeof(int));
-    //memcpy(buffer[4], (void*)message->num_bytes, sizeof(int));
-    //memcpy(buffer[8], (void*)message->last_message, sizeof(int)); 	
-    //memcpy(buffer[12], (void*)message->filename_length, sizeof(int)); 	
+    tpl_node *tn;
+    tn = tpl_map("S(iiii)", message);
+    tpl_pack(tn, 0);
+    tpl_dump(tn, TPL_MEM, &buffer, &len);
+    tpl_free(tn);
 
-    //Pack the metadata buffer
-    //metadata_buffer[0] = message->type;
-    //metadata_buffer[4] = message->num_bytes;
-    //metadata_buffer[8] = message->last_message;
-    //metadata_buffer[12] = message->filename_length;
+    send(sock, buffer, len, 0);
+    free(buffer);
+}
 
-
+void send_payload(message* message, byte* payload, int sock)
+{
     //Send the metadata
-    if(send(sock, &message, METADATASIZE, 0) != METADATASIZE)
+    if(send(sock, &message, MESSAGESIZE, 0) != MESSAGESIZE)
         perror("send() sent unexpected number of bytes for metadata");	
 
     byte buffer[BUFSIZE];
@@ -80,12 +81,16 @@ void send_message(message* message, byte* payload, int sock)
     //Send the payload 1500 (BUFSIZE) bytes at a time
     int remainingBytes = message->num_bytes;
     int offset = 0;
+    int numSent;
 
     while(remainingBytes > BUFSIZE){
-	   if(send(sock, &payload[BUFSIZE*offset], BUFSIZE, 0) != BUFSIZE)
-	       perror("send() sent unexpected number of bytes of data");
-	   remainingBytes = remainingBytes - BUFSIZE;
-	   offset=offset+1;				
+        numSent = send(sock, &payload[BUFSIZE*offset], BUFSIZE, 0);
+
+	    if(numSent < 0)
+	        perror("send() failed");
+
+	    remainingBytes = remainingBytes - numSent;
+	    offset=offset+1;				
     }
 
     //Send the remainder of the payload
@@ -101,17 +106,22 @@ void rcv_message(message* message, int clientSock)
     //Recieve metadata from client
     ssize_t bytesRecieved = recv(clientSock, rcvBuf, BUFSIZE, 0);
 
-    if(bytesRecieved < sizeof(metadata)){
-        printf("Did not recieve all of metadata\n");
+    if(bytesRecieved < sizeof(message)){
+        printf("Did not recieve all of the message\n");
         exit(1);
     }
 
-    //Remake the metadata struct
-    metadata md;
-    memcpy(&md, rcvBuf, sizeof(md));
+    tpl_node *tn;
+    tn = tpl_map("S(iiii)", &message);
+    tpl_load(tn, TPL_MEM, rcvBuf, sizeof(message));
+    tpl_unpack(tn, 0);
+    tpl_free(tn);
 
-    int msgSize = md.size;
-    if(!md.last)
+    //Remake the message struct
+    /*memcpy(message, rcvBuf, sizeof(msg));
+
+    int msgSize = msg.size;
+    if(!msg.last)
     {
         printf("Metadata does not have last set... What were you thinking???");
         exit(1);
@@ -125,10 +135,8 @@ void rcv_message(message* message, int clientSock)
         bytesRecieved = recv(clientSock, messageBuf, msgSize, 0);
         totalBytes += bytesRecieved;
     }
-    
-    printf(":|\n");
-    memcpy(message, messageBuf, msgSize);
-    printf(":3\n");
+
+    memcpy(message, messageBuf, msgSize);*/
 }
 
 #endif

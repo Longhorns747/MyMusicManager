@@ -4,7 +4,7 @@
 #include "networking_util.h"
 
 int user_prompt();
-void create_message(message* msg, filestate* state, int msgType);
+void create_message(message* msg, int numBytes, int msgType);
 void pull();
 void list();
 
@@ -21,28 +21,30 @@ int main()
 	printf("Welcome to your Music Manager :D!\n");
 
 	int lastPacket = 1;
+
 	while(userChoice)
 	{
 		userChoice = user_prompt();
-		message* msg;
+		message* msg = malloc(sizeof(message));
 
 		//payload will be a filestate in this case 
 		filestate* state;
-		create_message(msg, state, userChoice);
-		byte* payload = (byte *) state;
-
-		printf("Created message with type: %s\n", selections[msg->type]);
+		update_files(state);
 		
-		send_message(msg, payload, sock);
+		//Serialize the filestate
+		int numBytes = 3;
+		create_message(msg, numBytes, userChoice);
+		printf("Created message with type: %d\n", msg->type);
+
+		send_message(msg, sock);
 
 		//keep accepting metadata packets after a reponse until a last packet flag
-		while(!lastPacket){
+		/*while(!lastPacket){
 			//receive metadata response
 			message* metadata;
-			recv(sock, metadata, METADATASIZE, 0);
+			recv(sock, metadata, MESSAGESIZE, 0);
 	
 			int numBytes = metadata->num_bytes;
-			//message_type type = metadata->type;
 			lastPacket = metadata->last_message;
 			message_type type = metadata->type;
 				
@@ -53,7 +55,7 @@ int main()
 			    list();
 			else //type == LEAVE
 			    printf("Now exiting.\n");
-		}
+		}*/
 	}
 	return 0;
 }
@@ -68,7 +70,7 @@ int user_prompt()
 
 	//***
 	//What happens on bad user input? -SC
-        //***
+    //***
 
 	int select = 0;
 
@@ -81,11 +83,11 @@ int user_prompt()
 	return select;
 }
 
-void create_message(message* msg, filestate* state, int msgType)
+void create_message(message* msg, int numBytes, int msgType)
 {
-	msg->num_bytes = update_files(state);//TODO: THIS NEEDS TO RETURN NUM BYTES, NOT NUM FILES
-	msg->filename_length = 0; //Not used by client
-	msg->type = (message_type) msgType;
+	msg->num_bytes = numBytes;
+	msg->filename_length = 0;
+	msg->type = msgType;
 	msg->last_message = 1;
 }
 
@@ -98,12 +100,12 @@ void pull(int numBytes, int sock)
 
     while(numBytesRecv < (numBytes-BUFSIZE)){
 		recv(sock, &rcvMsg, BUFSIZE, 0);
-		memcpy(file[numBytesRecv], rcvMsg, BUFSIZE);
+		//memcpy(file[numBytesRecv], rcvMsg, BUFSIZE);
     }
 
     //grab the rest of the bytes
-    recv(sock, rcvMsg, BUFSIZE - numBytesRecv, 0);
-    memcpy(file[numBytesRecv], rcvMsg, BUFSIZE - numBytesRecv);
+    recv(sock, &rcvMsg, BUFSIZE - numBytesRecv, 0);
+    //memcpy(file[numBytesRecv], rcvMsg, BUFSIZE - numBytesRecv);
 
     //at this point we have the entire music file. Store it in memory somehow
 }

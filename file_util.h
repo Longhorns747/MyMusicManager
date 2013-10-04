@@ -82,7 +82,7 @@ int update_files(filestate* state)
 
     state->music_files = fileList;
     state->numFiles = numFiles;
-    return numFiles; //TODO: THIS MUST RETURN NUM OF BYTES, NOT NUM OF FILES
+    return numFiles;
 }
 
 void free_files(filestate* state)

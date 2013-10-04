@@ -14,12 +14,6 @@ typedef enum {
 	LEAVE, LIST, PULL, DIFF
 } message_type;
 
-typedef struct
-{
-	bool last;
-	int size;
-} metadata;
-
 typedef struct 
 {
 	char* filename;
@@ -35,7 +29,7 @@ typedef struct
 
 typedef struct
 {
-	message_type type; //Enum for message type
+	int type; //Enum for message type
 	int num_bytes; //The number of bytes to be sent
 	int last_message; //Is this the last message from the sender?
 	int filename_length; //Filename length, if a filename exists
