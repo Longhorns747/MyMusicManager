@@ -32,6 +32,7 @@ int main()
 		//int numBytes = recv(sock, rcvBuf, RCVBUFSIZE, 0);
 
 		//free_files(msg->state);
+
 	}
 	
 	return 0;
@@ -45,7 +46,7 @@ int user_prompt()
 
 	//***
 	//What happens on bad user input? -SC
-    //***
+        //***
 
 	int select = 0;
 
@@ -62,7 +63,8 @@ void create_message(message* msg, int msgType)
 {
 	filestate currState;
 	int numFiles = update_files(&currState);
-
-	msg->state = &currState;
+	msg->filename_length = 0; //Not used by client
+	msg->payload = &currState; //This should be a pointer to payload. Is this right?
 	msg->type = (message_type) msgType;
+
 }

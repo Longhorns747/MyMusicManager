@@ -7,7 +7,8 @@
 #include "data_structs.h"
 
 #define PORT 2222
-#define RCVBUFSIZE 1500
+#define BUFSIZE 1500
+#define HEADERSIZE 16
 
 typedef struct sockaddr_in sockaddr_in;
 
@@ -56,37 +57,54 @@ int setup_connection(sockaddr_in* address)
 void send_message(message* message, int sock)
 {
 
-    //Prepare metadata
-    metadata md;
-    int msgLength;
+    byte buffer[BUFSIZE];	
     
-    msgLength = sizeof(*message);
-    md.size = msgLength;
-    md.last = true;
+    //memcpy(buffer[0], (void*)message->type, sizeof(int));
+    //memcpy(buffer[4], (void*)message->num_bytes, sizeof(int));
+    //memcpy(buffer[8], (void*)message->last_message, sizeof(int)); 	
+    //memcpy(buffer[12], (void*)message->filename_length, sizeof(int)); 	
 
-    int mdlength;
-    mdlength = sizeof(md);
+    //Pack the metadata buffer
+    buffer[0] = message->type;
+    buffer[4] = message->num_bytes;
+    buffer[8] = message->last_message;
+    buffer[12] = message->filename_length;
 
     //Send the metadata
-    if(send(sock, &md, mdlength, 0) != mdlength)
-        perror("send() sent unexpected number of bytes for metadata");
+    if(send(sock, buffer, BUFSIZE, 0) != BUFSIZE)
+        perror("send() sent unexpected number of bytes for metadata");	
+
+    //Send the payload 1500 bytes at a time
+    int bytesWaiting = message->num_bytes;
+    int offset = 0;
+    while(bytesWaiting > BUFSIZE){
+	if(send(sock, message->payload[BUFSIZE*offset], BUFSIZE, 0) != BUFSIZE)
+	    perror("send() sent unexpected number of bytes of data");
+	bytesWaiting = bytesWaiting - BUFSIZE;
+	offset=offset+1;				
+    }
+
+    //Send the remainder of the payload
+    if(send(sock, message->payload[BUFSIZE*offset], bytesWaiting, 0) != bytesWaiting)
+	        perror("send() sent unexpected number of bytes of data");	
     
-    //Send msg
-    if(send(sock, message, msgLength, 0) != msgLength)
-        perror("send() sent unexpected number of bytes for message");
+
 }
 
 void rcv_message(message* message, int clientSock)
 {
-    byte rcvBuf[RCVBUFSIZE];
+    byte rcvBuf[BUFSIZE];
 
     //Recieve metadata from client
-    ssize_t bytesRecieved = recv(clientSock, rcvBuf, RCVBUFSIZE, 0);
+    ssize_t bytesRecieved = recv(clientSock, rcvBuf, BUFSIZE, 0);
 
     if(bytesRecieved < sizeof(metadata)){
         printf("Did not recieve all of metadata\n");
         exit(1);
     }
+
+
+
 
     //Remake the metadata struct
     metadata md;
