@@ -9,6 +9,7 @@ void setup_serveraddr(sockaddr_in* serverAddr);
 void make_socket(int* sock);
 void list(int sock);
 void leave(int sock);
+void diff(int sock);
 
 int main()
 {
@@ -59,6 +60,8 @@ int main()
                 leave(clientSock);
             case LIST:
                 list(clientSock);
+            case DIFF:
+                diff(clientSock);
         }
 
     }
@@ -97,24 +100,16 @@ void list(int sock)
     //Get current filestate
     filestate currState;
     update_files(&currState);
-
-    for(int i = 0; i < currState.numFiles; i++){
-        char* filename = currState.music_files[i].filename;
-
-        message msg;
-        create_message(&msg, strlen(filename), LIST, 0, strlen(filename));
-
-        send_payload(&msg, filename, sock);
-    }
-
-    //Make the last message
-    message lastMsg;
-    create_message(&lastMsg, 0, LIST, 1, 0);
-    send_message(&lastMsg, sock);
+    send_filenames(&currState, sock);
 }
 
 void leave(int sock)
 {
     printf("Doing a LEAVE :O\n");
     close(sock);
+}
+
+void diff(int sock)
+{
+    
 }

@@ -12,7 +12,7 @@ typedef unsigned char byte;
 int alphasort(const struct dirent ** a, const struct dirent **b);
 int update_files(filestate* state);
 void free_files(filestate* state);
-filestate* delta(filestate* receiver, filestate* sender);
+void delta(filestate* receiver, filestate* sender, filestate* res);
 
 
 byte* load_file(char fileName[], off_t fileSize)
@@ -81,7 +81,6 @@ int update_files(filestate* state)
     		stat(files[i]->d_name, &fileAttributes);
     		fileList[i].filename = files[i]->d_name;
     		fileList[i].ID = get_unique_id(files[i]->d_name, fileAttributes.st_size);
-            printf("Made musicfile for %s\n", fileList[i].filename);
     	}
     }
     else
@@ -100,9 +99,8 @@ void free_files(filestate* state)
 }
 
 //Returns the filestate of files different in sender from receiver  (sender - receiver )
-filestate* delta(filestate* receiver, filestate* sender)
+void delta(filestate* receiver, filestate* sender, filestate* res)
 {
-    filestate *res;
     int senderLength = sender->numFiles;
     int receiverLength = receiver->numFiles;
 
@@ -110,13 +108,11 @@ filestate* delta(filestate* receiver, filestate* sender)
     if(receiverLength == 0){
 	    res->numFiles = senderLength;
         res->music_files = sender->music_files;
-	    return res;
     }
 
     //if the sender has no files, nothing can be sent
     if(senderLength == 0){
     	res->numFiles = 0;
-    	return res;
     }   	
 
     int senderIdx = 0;
@@ -155,7 +151,6 @@ filestate* delta(filestate* receiver, filestate* sender)
 
     res->numFiles = fileCount;
     res->music_files = fileList;
-    return res;
 }
 
 #endif

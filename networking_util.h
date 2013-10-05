@@ -16,6 +16,9 @@ void create_message(message* msg, int numBytes, int msgType, int last_message, i
 void send_message(message* msg, int sock);
 void send_payload(message* msg, byte* payload, int sock);
 void rcv_message(message* msg, int sock);
+void send_filenames(filestate* state, int sock);
+void rcv_filenames(int sock);
+void send_ids(filestate* state, int sock);
 
 void create_message(message* msg, int numBytes, int msgType, int last_message, int filename_length)
 {
@@ -78,6 +81,111 @@ void send_payload(message* msg, byte* payload, int sock)
     //Send the remainder of the payload
     if(send(sock, payload + (BUFSIZE*offset), remainingBytes, 0) != remainingBytes)
        perror("send() sent unexpected number of bytes of data");       
+}
+
+void send_filenames(filestate* state, int sock)
+{
+    for(int i = 0; i < state->numFiles; i++){
+        char* filename = state->music_files[i].filename;
+
+        message msg;
+        create_message(&msg, strlen(filename), LIST, 0, strlen(filename));
+
+        send_payload(&msg, filename, sock);
+    }
+
+    //Make the last message
+    message lastMsg;
+    create_message(&lastMsg, 0, LIST, 1, 0);
+    send_message(&lastMsg, sock);
+}
+
+void rcv_filenames(int sock)
+{
+    printf("Waiting for a list of files...\n");
+    message msg;
+    rcv_message(&msg, sock);
+    int count = 1;
+
+    while(!msg.last_message)
+    {
+        //Recieve filename from server
+        byte filename[msg.num_bytes + 1];
+        memset(filename, 0, msg.num_bytes);
+
+        ssize_t bytesRecieved;
+        int totalBytes = 0;
+
+        while(totalBytes < msg.num_bytes){
+            bytesRecieved = recv(sock, filename, msg.num_bytes, 0);
+            if(bytesRecieved < 0)
+                printf("Couldn't recieve filenames :(");
+
+            totalBytes += bytesRecieved;
+        }
+
+        filename[msg.num_bytes] = '\0';
+        printf("File %d: %s\n", count, (char *)filename);
+        count++;
+
+        memset(filename, 0, msg.num_bytes);
+        rcv_message(&msg, sock);
+    }
+}
+
+void send_ids(filestate* state, int sock)
+{
+    for(int i = 0; i < state->numFiles; i++){
+        char* ID = state->music_files[i].ID;
+
+        message msg;
+        create_message(&msg, strlen(ID), LIST, 0, strlen(ID));
+
+        send_payload(&msg, ID, sock);
+    }
+
+    //Make the last message
+    message lastMsg;
+    create_message(&lastMsg, 0, LIST, 1, 0);
+    send_message(&lastMsg, sock);
+}
+
+void rcv_IDs(filestate* res, int sock)
+{
+    printf("Waiting for file IDs...\n");
+    message msg;
+    rcv_message(&msg, sock);
+    int count = 0;
+
+    music_file* fileList;
+
+    while(!msg.last_message)
+    {
+        //Recieve ID from server
+        byte ID[msg.num_bytes + 1];
+
+        ssize_t bytesRecieved;
+        int totalBytes = 0;
+
+        while(totalBytes < msg.num_bytes){
+            bytesRecieved = recv(sock, ID, msg.num_bytes, 0);
+
+            if(bytesRecieved < 0)
+                printf("Couldn't recieve ID :(");
+
+            totalBytes += bytesRecieved;
+        }
+
+        music_file* currFile = (music_file*) malloc(sizeof(music_file));
+        currFile->ID = ID;
+        fileList[count] = *currFile;
+        count++;
+
+        rcv_message(&msg, sock);
+    }
+
+    res->music_files = fileList;
+    res->numFiles = count;
 }
 
 #endif

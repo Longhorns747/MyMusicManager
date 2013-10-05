@@ -8,6 +8,7 @@ void setup_addr(char* IPaddr, sockaddr_in *address);
 int user_prompt();
 void pull();
 void list();
+void diff(int sock);
 
 int main()
 {
@@ -40,8 +41,13 @@ int main()
 		switch(msg.type){
             case LEAVE:
                 exit(1);
+                break;
             case LIST:
                 list(sock);
+                break;
+            case DIFF:
+            	diff(sock);
+            	break;
         }
 	}
 
@@ -123,33 +129,13 @@ void pull(int numBytes, int sock)
 
 void list(int sock)
 {
-	printf("Waiting for a list of files...\n");
-	message msg;
-	rcv_message(&msg, sock);
-	int count = 1;
+	rcv_filenames(sock);
+}
 
-	while(!msg.last_message)
-	{
-		//Recieve filename from server
-		byte filename[msg.num_bytes + 1];
-		memset(filename, 0, msg.num_bytes);
-
-    	ssize_t bytesRecieved;
-    	int totalBytes = 0;
-
-		while(totalBytes < msg.num_bytes){
-			bytesRecieved = recv(sock, filename, msg.num_bytes, 0);
-			if(bytesRecieved < 0)
-				printf("Couldn't recieve filenames :(");
-
-			totalBytes += bytesRecieved;
-		}
-
-		filename[msg.num_bytes] = '\0';
-		printf("File %d: %s\n", count, (char *)filename);
-		count++;
-
-		memset(filename, 0, msg.num_bytes);
-		rcv_message(&msg, sock);
-	}
+void diff(int sock)
+{
+	filestate currState;
+	update_files(&currState);
+	send_ids(&currState, sock);
+	rcv_filenames(sock);
 }
