@@ -3,8 +3,9 @@
 #include "file_util.h"
 #include "networking_util.h"
 
+int setup_connection(sockaddr_in* address);
+void setup_addr(char* IPaddr, sockaddr_in *address);
 int user_prompt();
-void create_message(message* msg, int numBytes, int msgType);
 void pull();
 void list();
 
@@ -26,17 +27,19 @@ int main()
 	{
 		userChoice = user_prompt();
 		message msg;
-
-		//payload will be a filestate in this case 
-		filestate state;
-		update_files(&state);
 		
-		//Serialize the filestate
 		int numBytes = 3;
-		create_message(&msg, numBytes, userChoice);
+		create_message(&msg, numBytes, userChoice, 1, 1);
 		printf("Created message with type: %d\n", msg.type);
 
 		send_message(&msg, sock);
+
+		switch(msg.type){
+            case LEAVE:
+                exit(1);
+            case LIST:
+                list(sock);
+        }
 
 		//keep accepting metadata packets after a reponse until a last packet flag
 		/*while(!lastPacket){
@@ -60,8 +63,6 @@ int main()
 	return 0;
 }
 
-
-
 int user_prompt()
 {
 	char selection[5];
@@ -83,12 +84,41 @@ int user_prompt()
 	return select;
 }
 
-void create_message(message* msg, int numBytes, int msgType)
+//Set up the address structure for a given address
+void setup_addr(char* IPaddr, sockaddr_in *address)
 {
-	msg->num_bytes = numBytes;
-	msg->filename_length = 0;
-	msg->type = msgType;
-	msg->last_message = 1;
+	memset(address, 0, sizeof(*address));
+
+	//Setting the protocol family
+    address->sin_family = AF_INET;
+
+    //Formatting and setting the IP address
+    int rtnVal = inet_pton(AF_INET, IPaddr, &(address->sin_addr.s_addr));
+    if(rtnVal <= 0){
+        printf("inet_pton failed :(\n");
+        exit(1);
+    }
+
+    //Setting the port
+    address->sin_port = htons(PORT);
+}
+
+//Returns a socket to setup the connection with a host
+int setup_connection(sockaddr_in* address)
+{
+    /* Create a new TCP socket*/
+    int clientSock = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+    if(clientSock < 0){
+        printf("socket() failed :(\n");
+        exit(1);
+    }
+
+    if(connect(clientSock, (struct sockaddr *) address, sizeof(*address)) < 0){
+        printf("connect() failed :(\n");
+        exit(1);
+    }
+
+    return clientSock;
 }
 
 void pull(int numBytes, int sock)
@@ -110,9 +140,35 @@ void pull(int numBytes, int sock)
     //at this point we have the entire music file. Store it in memory somehow
 }
 
-void list()
+void list(int sock)
 {
-	char* filename;
-    //TODO: call recv, and use that buffer to print out each string name.
-    //strings will be separated by /0
+	printf("Waiting for a list of files...\n");
+	message msg;
+	rcv_message(&msg, sock);
+	int count = 1;
+
+	while(!msg.last_message)
+	{
+		//Recieve filename from server
+		byte filename[msg.num_bytes + 1];
+		memset(filename, 0, msg.num_bytes);
+
+    	ssize_t bytesRecieved;
+    	int totalBytes = 0;
+
+		while(totalBytes < msg.num_bytes){
+			bytesRecieved = recv(sock, filename, msg.num_bytes, 0);
+			if(bytesRecieved < 0)
+				printf("Couldn't recieve filenames :(");
+
+			totalBytes += bytesRecieved;
+		}
+		
+		filename[msg.num_bytes] = '\0';
+		printf("File %d: %s\n", count, (char *)filename);
+		count++;
+
+		memset(filename, 0, msg.num_bytes);
+		rcv_message(&msg, sock);
+	}
 }

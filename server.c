@@ -7,6 +7,8 @@
 
 void setup_serveraddr(sockaddr_in* serverAddr);
 void make_socket(int* sock);
+void list(int sock);
+void leave(int sock);
 
 int main()
 {
@@ -44,12 +46,20 @@ int main()
 
     printf("Client accepted... \n");
 
+    //Recieve and handle messages
     while(1){
         message msg;
         printf("Ready to recieve messages!\n");
         
         rcv_message(&msg, clientSock);
         printf("Whoa a message! Type: %d\n", msg.type);
+
+        switch(msg.type){
+            case LEAVE:
+                leave(clientSock);
+            case LIST:
+                list(clientSock);
+        }
 
     }
     
@@ -78,4 +88,32 @@ void setup_serveraddr(sockaddr_in* serverAddr)
     serverAddr->sin_family = AF_INET;
     serverAddr->sin_addr.s_addr = htonl(INADDR_ANY);
     serverAddr->sin_port = htons(PORT);
+}
+
+void list(int sock)
+{
+    printf("Doing a LIST :O\n");
+
+    //Get current filestate
+    filestate currState;
+    update_files(&currState);
+
+    for(int i = 0; i < currState.numFiles; i++){
+        char* filename = currState.music_files[i].filename;
+
+        message msg;
+        create_message(&msg, strlen(filename), LIST, 0, strlen(filename));
+
+        send_payload(&msg, filename, sock);
+    }
+
+    //Make the last message
+    message lastMsg;
+    create_message(&lastMsg, 0, LIST, 1, 0);
+}
+
+void leave(int sock)
+{
+    printf("Doing a LEAVE :O\n");
+    close(sock);
 }

@@ -12,47 +12,17 @@
 
 typedef struct sockaddr_in sockaddr_in;
 
-int setup_connection(sockaddr_in* address);
-void setup_addr(char* IPaddr, sockaddr_in *address);
+void create_message(message* msg, int numBytes, int msgType, int last_message, int filename_length);
 void send_message(message* msg, int sock);
 void send_payload(message* msg, byte* payload, int sock);
 void rcv_message(message* msg, int sock);
 
-//Set up the address structure for a given address
-void setup_addr(char* IPaddr, sockaddr_in *address)
+void create_message(message* msg, int numBytes, int msgType, int last_message, int filename_length)
 {
-	memset(address, 0, sizeof(*address));
-
-	//Setting the protocol family
-    address->sin_family = AF_INET;
-
-    //Formatting and setting the IP address
-    int rtnVal = inet_pton(AF_INET, IPaddr, &(address->sin_addr.s_addr));
-    if(rtnVal <= 0){
-        printf("inet_pton failed :(\n");
-        exit(1);
-    }
-
-    //Setting the port
-    address->sin_port = htons(PORT);
-}
-
-//Returns a socket to setup the connection with a host
-int setup_connection(sockaddr_in* address)
-{
-    /* Create a new TCP socket*/
-    int clientSock = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
-    if(clientSock < 0){
-        printf("socket() failed :(\n");
-        exit(1);
-    }
-
-    if(connect(clientSock, (struct sockaddr *) address, sizeof(*address)) < 0){
-        printf("connect() failed :(\n");
-        exit(1);
-    }
-
-    return clientSock;
+    msg->num_bytes = numBytes;
+    msg->filename_length = filename_length;
+    msg->type = msgType;
+    msg->last_message = last_message;
 }
 
 void send_message(message* msg, int sock)
@@ -62,16 +32,16 @@ void send_message(message* msg, int sock)
     send(sock, msg, len, 0);
 }
 
-void rcv_message(message* msg, int clientSock)
+void rcv_message(message* msg, int sock)
 {
-    byte rcvBuf[sizeof(msg)];
+    byte rcvBuf[sizeof(message)];
 
     //Recieve metadata from client
     ssize_t bytesRecieved;
     int totalBytes = 0;
 
     while(totalBytes < sizeof(msg)){
-        bytesRecieved = recv(clientSock, rcvBuf, sizeof(msg), 0);
+        bytesRecieved = recv(sock, rcvBuf, sizeof(message), 0);
 
         if(bytesRecieved < 0)
             perror("Recv failed :(");
@@ -85,7 +55,7 @@ void rcv_message(message* msg, int clientSock)
 void send_payload(message* msg, byte* payload, int sock)
 {
     //Send the metadata
-    if(send(sock, &msg, MESSAGESIZE, 0) != MESSAGESIZE)
+    if(send(sock, msg, MESSAGESIZE, 0) != MESSAGESIZE)
         perror("send() sent unexpected number of bytes for metadata");  
 
     byte buffer[BUFSIZE];
@@ -106,9 +76,8 @@ void send_payload(message* msg, byte* payload, int sock)
     }
 
     //Send the remainder of the payload
-    if(send(sock, &payload[BUFSIZE*offset], remainingBytes, 0) != remainingBytes)
-       perror("send() sent unexpected number of bytes of data");    
-    
+    if(send(sock, payload + (BUFSIZE*offset), remainingBytes, 0) != remainingBytes)
+       perror("send() sent unexpected number of bytes of data");       
 }
 
 #endif

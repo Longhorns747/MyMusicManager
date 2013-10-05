@@ -4,6 +4,7 @@
 #include <openssl/sha.h>
 #include <dirent.h>
 #include <sys/stat.h>
+#include <string.h>
 #include "data_structs.h"
 
 typedef unsigned char byte;
@@ -47,16 +48,24 @@ byte* get_unique_id(char fileName[], off_t fileSize)
 }
 
 //Needed for the scandir function used below
-static int one()
+int findMusic(struct dirent * file)
 {
-	return 1;
+	struct stat fileAttributes;
+    int namelength = strlen(file->d_name);
+
+    char extension[4];
+    memcpy(extension, &file->d_name[namelength - 3], 3);
+    extension[3] = '\0';
+    char mp3[] = {"mp3"}; 
+
+    return !strcmp(extension, mp3);
 }
 
 int update_files(filestate* state)
 {
     struct dirent **files;
 
-    int numFiles = scandir("./", &files, one, alphasort);
+    int numFiles = scandir("./", &files, findMusic, alphasort);
 
     printf("Scanned directory\n");
 
