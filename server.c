@@ -54,14 +54,19 @@ int main()
         
         rcv_message(&msg, clientSock);
         printf("Whoa a message! Type: %d\n", msg.type);
+        if(msg.type == -1)
+            continue;
 
         switch(msg.type){
             case LEAVE:
                 leave(clientSock);
+                break;
             case LIST:
                 list(clientSock);
+                break;
             case DIFF:
                 diff(clientSock);
+                break;
         }
 
     }
@@ -111,5 +116,14 @@ void leave(int sock)
 
 void diff(int sock)
 {
-    
+    printf("Doing a DIFF :O\n");
+    filestate senderIDs;
+    filestate currState;
+    filestate diff;
+    //rcv_IDs(&senderIDs, sock);
+
+
+    update_files(&currState);
+    //delta(&currState, &senderIDs, &diff);
+    //send_filenames(&diff, sock);
 }

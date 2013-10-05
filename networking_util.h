@@ -43,7 +43,7 @@ void rcv_message(message* msg, int sock)
     ssize_t bytesRecieved;
     int totalBytes = 0;
 
-    while(totalBytes < sizeof(msg)){
+    while(totalBytes < sizeof(message)){
         bytesRecieved = recv(sock, rcvBuf, sizeof(message), 0);
 
         if(bytesRecieved < 0)
@@ -139,14 +139,14 @@ void send_ids(filestate* state, int sock)
         char* ID = state->music_files[i].ID;
 
         message msg;
-        create_message(&msg, strlen(ID), LIST, 0, strlen(ID));
+        create_message(&msg, strlen(ID), -1, 0, strlen(ID));
 
         send_payload(&msg, ID, sock);
     }
 
     //Make the last message
     message lastMsg;
-    create_message(&lastMsg, 0, LIST, 1, 0);
+    create_message(&lastMsg, 0, -1, 1, 0);
     send_message(&lastMsg, sock);
 }
 
@@ -158,9 +158,16 @@ void rcv_IDs(filestate* res, int sock)
     int count = 0;
 
     music_file* fileList;
+    printf(":O\n");
+    fileList = (music_file*) malloc(sizeof(music_file));
+    printf("%d\n", msg.last_message);
 
     while(!msg.last_message)
     {
+        printf(":3\n");
+        count++;
+        fileList = (music_file*) realloc(&fileList, sizeof(music_file)*(count)); 
+
         //Recieve ID from server
         byte ID[msg.num_bytes + 1];
 
@@ -179,7 +186,6 @@ void rcv_IDs(filestate* res, int sock)
         music_file* currFile = (music_file*) malloc(sizeof(music_file));
         currFile->ID = ID;
         fileList[count] = *currFile;
-        count++;
 
         rcv_message(&msg, sock);
     }

@@ -34,8 +34,8 @@ int main()
 
 		message msg;
 		
-		int numBytes = 3;
-		create_message(&msg, numBytes, userChoice, 1, 1);
+		create_message(&msg, 0, userChoice, 1, 0);
+		printf("Created message with type: %d\n", msg.type);
 		send_message(&msg, sock);
 
 		switch(msg.type){
