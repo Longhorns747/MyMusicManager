@@ -10,10 +10,10 @@ ifeq ($(OS), SunOS)
 all: client server 
 
 client: client.c
-	$(CC) tpl.c client.c -o musicManager -std=c99 -lcrypto
+	$(CC) client.c -o musicManager -std=c99 -lcrypto
 
 server: server.c
-	$(CC) tpl.c server.c -o musicServer -std=c99 -lcrypto
+	$(CC) server.c -o musicServer -std=c99 -lcrypto
 
 clean:
 	    rm -f client server *.o

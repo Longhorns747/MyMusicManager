@@ -46,7 +46,7 @@ int main()
 
     while(1){
         message msg;
-        printf("Ready to recieve messages!\n", sock);
+        printf("Ready to recieve messages!\n");
         
         rcv_message(&msg, clientSock);
         printf("Whoa a message! Type: %d\n", msg.type);

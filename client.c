@@ -25,18 +25,18 @@ int main()
 	while(userChoice)
 	{
 		userChoice = user_prompt();
-		message* msg = malloc(sizeof(message));
+		message msg;
 
 		//payload will be a filestate in this case 
-		filestate* state;
-		update_files(state);
+		filestate state;
+		update_files(&state);
 		
 		//Serialize the filestate
 		int numBytes = 3;
-		create_message(msg, numBytes, userChoice);
-		printf("Created message with type: %d\n", msg->type);
+		create_message(&msg, numBytes, userChoice);
+		printf("Created message with type: %d\n", msg.type);
 
-		send_message(msg, sock);
+		send_message(&msg, sock);
 
 		//keep accepting metadata packets after a reponse until a last packet flag
 		/*while(!lastPacket){
