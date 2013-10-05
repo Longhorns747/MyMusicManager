@@ -110,6 +110,7 @@ void list(int sock)
     //Make the last message
     message lastMsg;
     create_message(&lastMsg, 0, LIST, 1, 0);
+    send_message(&lastMsg, sock);
 }
 
 void leave(int sock)

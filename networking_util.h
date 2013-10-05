@@ -27,7 +27,7 @@ void create_message(message* msg, int numBytes, int msgType, int last_message, i
 
 void send_message(message* msg, int sock)
 {
-    ssize_t len = sizeof(msg);
+    ssize_t len = sizeof(message);
 
     send(sock, msg, len, 0);
 }

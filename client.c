@@ -26,12 +26,15 @@ int main()
 	while(userChoice)
 	{
 		userChoice = user_prompt();
+
+		//Handle bad user input
+		if(userChoice == -1)
+			continue;
+
 		message msg;
 		
 		int numBytes = 3;
 		create_message(&msg, numBytes, userChoice, 1, 1);
-		printf("Created message with type: %d\n", msg.type);
-
 		send_message(&msg, sock);
 
 		switch(msg.type){
@@ -40,26 +43,8 @@ int main()
             case LIST:
                 list(sock);
         }
-
-		//keep accepting metadata packets after a reponse until a last packet flag
-		/*while(!lastPacket){
-			//receive metadata response
-			message* metadata;
-			recv(sock, metadata, MESSAGESIZE, 0);
-	
-			int numBytes = metadata->num_bytes;
-			lastPacket = metadata->last_message;
-			message_type type = metadata->type;
-				
-			//accept mp3 file data
-			if(type == PULL)
-				pull();
-			else if(type == LIST || DIFF)
-			    list();
-			else //type == LEAVE
-			    printf("Now exiting.\n");
-		}*/
 	}
+
 	return 0;
 }
 
@@ -69,11 +54,7 @@ int user_prompt()
 	printf("Please make a selection from one of the following: LEAVE, LIST, PULL, DIFF\n");
 	scanf("%s", selection);
 
-	//***
-	//What happens on bad user input? -SC
-    //***
-
-	int select = 0;
+	int select = -1;
 
 	for(int i = 0; i < NUM_MESSAGES; i++){
 		if(!strcmp(selection, selections[i])){
@@ -163,7 +144,7 @@ void list(int sock)
 
 			totalBytes += bytesRecieved;
 		}
-		
+
 		filename[msg.num_bytes] = '\0';
 		printf("File %d: %s\n", count, (char *)filename);
 		count++;
