@@ -19,6 +19,7 @@ void rcv_message(message* msg, int sock);
 void send_filenames(filestate* state, int sock);
 void rcv_filenames(int sock);
 void send_ids(filestate* state, int sock);
+void rcv_IDs(filestate* res, int sock);
 
 void create_message(message* msg, int numBytes, int msgType, int last_message, int filename_length)
 {
@@ -166,7 +167,8 @@ void rcv_IDs(filestate* res, int sock)
 
         //Recieve ID from server
         byte ID[msg.num_bytes + 1];
-
+        
+        memset(ID, 0, msg.num_bytes + 1);
         ssize_t bytesRecieved;
         int totalBytes = 0;
 
@@ -179,15 +181,17 @@ void rcv_IDs(filestate* res, int sock)
             totalBytes += bytesRecieved;
         }
 
+        ID[msg.num_bytes] = '\0';
         music_file* currFile = (music_file*) malloc(sizeof(music_file));
-        currFile->ID = ID;
+        currFile->ID = (unsigned char *) malloc(sizeof(ID));
+        memcpy(currFile->ID, ID, sizeof(ID));
+
         fileList[count] = *currFile;
 
         count++;
         rcv_message(&msg, sock);
     }
 
-    //This doesn't seem to be working...
     res->music_files = fileList;
     res->numFiles = count;
 }

@@ -117,12 +117,12 @@ void leave(int sock)
 void diff(int sock)
 {
     printf("Doing a DIFF :O\n");
-    filestate senderIDs;
     filestate currState;
+    filestate senderIDs;
     filestate diff;
 
-    rcv_IDs(&senderIDs, sock);
     update_files(&currState);
+    rcv_IDs(&senderIDs, sock);
     delta(&senderIDs, &currState, &diff);
     send_filenames(&diff, sock);
 }

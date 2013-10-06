@@ -1,4 +1,4 @@
-CC=gcc
+	CC=gcc
 
 OS := $(shell uname -s)
 
@@ -10,10 +10,10 @@ ifeq ($(OS), SunOS)
 all: client server 
 
 client: client.c
-	$(CC) client.c -o musicManager -std=c99 -lcrypto
+	$(CC) client.c -g -o musicManager -std=c99 -lcrypto
 
 server: server.c
-	$(CC) server.c -o musicServer -std=c99 -lcrypto
+	$(CC) server.c -ggdb -o musicServer -std=c99 -lcrypto
 
 clean:
 	    rm -f client server *.o

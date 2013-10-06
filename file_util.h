@@ -127,8 +127,6 @@ void delta(filestate* receiver, filestate* sender, filestate* res)
 
     while(senderIdx < senderLength && receiverIdx < receiverLength){
     	//compare music file IDs
-        printf("Sender: %d Rcvr: %d\n", senderIdx, receiverIdx);
-        printf("SenderID: %s RcvrID: %s\n", sender->music_files[senderIdx].ID, receiver->music_files[receiverIdx].ID);
         comparison = strcmp(sender->music_files[senderIdx].ID, receiver->music_files[receiverIdx].ID);
 
     	if(comparison == 0)
