@@ -158,15 +158,11 @@ void rcv_IDs(filestate* res, int sock)
     int count = 0;
 
     music_file* fileList;
-    printf(":O\n");
     fileList = (music_file*) malloc(sizeof(music_file));
-    printf("%d\n", msg.last_message);
 
     while(!msg.last_message)
     {
-        printf(":3\n");
-        count++;
-        fileList = (music_file*) realloc(&fileList, sizeof(music_file)*(count)); 
+        fileList = (music_file*) realloc(fileList, sizeof(music_file)*(count + 1)); 
 
         //Recieve ID from server
         byte ID[msg.num_bytes + 1];
@@ -187,6 +183,7 @@ void rcv_IDs(filestate* res, int sock)
         currFile->ID = ID;
         fileList[count] = *currFile;
 
+        count++;
         rcv_message(&msg, sock);
     }
 

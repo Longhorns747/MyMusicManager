@@ -120,10 +120,9 @@ void diff(int sock)
     filestate senderIDs;
     filestate currState;
     filestate diff;
-    //rcv_IDs(&senderIDs, sock);
 
-
+    rcv_IDs(&senderIDs, sock);
     update_files(&currState);
-    //delta(&currState, &senderIDs, &diff);
-    //send_filenames(&diff, sock);
+    delta(&senderIDs, &currState, &diff);
+    send_filenames(&diff, sock);
 }
