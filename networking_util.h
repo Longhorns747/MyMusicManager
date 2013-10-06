@@ -187,6 +187,7 @@ void rcv_IDs(filestate* res, int sock)
         rcv_message(&msg, sock);
     }
 
+    //This doesn't seem to be working...
     res->music_files = fileList;
     res->numFiles = count;
 }
