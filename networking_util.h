@@ -6,13 +6,14 @@
 #include <string.h>
 #include "data_structs.h"
 
+#define LAST_PACKET 1
 #define PORT 2222
 #define BUFSIZE 1500
 #define MESSAGESIZE sizeof(message)
 
 typedef struct sockaddr_in sockaddr_in;
 
-void create_message(message* msg, int numBytes, int msgType, int last_message, int filename_length);
+void create_message(message* msg, int numBytes, int msgType, int last_message);
 void send_message(message* msg, int sock);
 void send_payload(message* msg, byte* payload, int sock);
 void rcv_message(message* msg, int sock);
@@ -21,10 +22,9 @@ void rcv_filenames(int sock);
 void send_ids(filestate* state, int sock);
 void rcv_IDs(filestate* res, int sock);
 
-void create_message(message* msg, int numBytes, int msgType, int last_message, int filename_length)
+void create_message(message* msg, int numBytes, int msgType, int last_message)
 {
     msg->num_bytes = numBytes;
-    msg->filename_length = filename_length;
     msg->type = msgType;
     msg->last_message = last_message;
 }
@@ -90,14 +90,14 @@ void send_filenames(filestate* state, int sock)
         char* filename = state->music_files[i].filename;
 
         message msg;
-        create_message(&msg, strlen(filename), LIST, 0, strlen(filename));
+        create_message(&msg, strlen(filename), LIST, 0);
 
         send_payload(&msg, filename, sock);
     }
 
     //Make the last message
     message lastMsg;
-    create_message(&lastMsg, 0, LIST, 1, 0);
+    create_message(&lastMsg, 0, LIST, LAST_PACKET);
     send_message(&lastMsg, sock);
 }
 
@@ -134,20 +134,21 @@ void rcv_filenames(int sock)
     }
 }
 
+//NOTE TO SELF: what if filestate takes up more than one packet?
 void send_ids(filestate* state, int sock)
 {
     for(int i = 0; i < state->numFiles; i++){
         char* ID = state->music_files[i].ID;
 
         message msg;
-        create_message(&msg, strlen(ID), -1, 0, strlen(ID));
+        create_message(&msg, strlen(ID), -1, 0);
 
         send_payload(&msg, ID, sock);
     }
 
     //Make the last message
     message lastMsg;
-    create_message(&lastMsg, 0, -1, 1, 0);
+    create_message(&lastMsg, 0, -1, LAST_PACKET);
     send_message(&lastMsg, sock);
 }
 

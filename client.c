@@ -34,21 +34,24 @@ int main()
 
 		message msg;
 		
-		create_message(&msg, 0, userChoice, 1, 0);
+		//Fill message struct 
+		create_message(&msg, 0, userChoice, LAST_PACKET);
 		printf("Created message with type: %d\n", msg.type);
 		send_message(&msg, sock);
 
 		switch(msg.type){
-            case LEAVE:
-                exit(1);
-                break;
-            case LIST:
-                list(sock);
-                break;
-            case DIFF:
-            	diff(sock);
-            	break;
-        }
+		    case LEAVE:
+		        exit(1);
+		        break;
+		    case LIST:
+		        list(sock);
+		        break;
+		    case DIFF:
+		    	diff(sock);
+		    	break;
+		    default:
+			pull(sock);
+        	}
 	}
 
 	return 0;
@@ -110,7 +113,13 @@ int setup_connection(sockaddr_in* address)
 
 void pull(int numBytes, int sock)
 {
-	//TODO: handle filename. FIlename should be at the beginning of each mp3 file payload 	
+    filestate currState;
+    update_files(&currState);
+    send_ids(&currState, sock);	
+    //rcv_music_files(sock);
+
+
+    //TODO: handle filename. FIlename should be at the beginning of each mp3 file payload 	
     char file[numBytes]; //maybe make this a file type?
     int numBytesRecv = 0;
     byte rcvMsg;

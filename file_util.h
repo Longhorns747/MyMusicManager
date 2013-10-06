@@ -134,7 +134,7 @@ void delta(filestate* receiver, filestate* sender, filestate* res)
     	else if (comparison < 0)
     	    receiverIdx++;
     	else{
-	        fileCount++;
+	    fileCount++;
             fileList = (music_file*) realloc(fileList, sizeof(music_file)*(fileCount));  
             fileList[deltaIdx++] = sender->music_files[senderIdx++];
         }
