@@ -6,8 +6,8 @@
 int setup_connection(sockaddr_in* address);
 void setup_addr(char* IPaddr, sockaddr_in *address);
 int user_prompt();
-void pull();
-void list();
+void pull(int sock);
+void list(int sock);
 void diff(int sock);
 
 int main()
@@ -39,16 +39,18 @@ int main()
 		send_message(&msg, sock);
 
 		switch(msg.type){
-            case LEAVE:
-                exit(1);
-                break;
-            case LIST:
-                list(sock);
-                break;
-            case DIFF:
-            	diff(sock);
-            	break;
-        }
+		    case LEAVE:
+		        exit(1);
+		        break;
+		    case LIST:
+		        list(sock);
+		        break;
+		    case DIFF:
+		    	diff(sock);
+		    	break;
+		    default:
+			pull(sock);
+		}
 	}
 
 	return 0;
@@ -126,7 +128,12 @@ void pull(int numBytes, int sock)
 
     //at this point we have the entire music file. Store it in memory somehow
 }
+void pull(int sock){
 
+
+
+
+}
 void list(int sock)
 {
 	rcv_filenames(sock);
