@@ -124,6 +124,7 @@ void delta(filestate* receiver, filestate* sender, filestate* res)
     //if the sender has no files, nothing can be sent
     if(senderLength == 0){
     	res->numFiles = 0;
+	//Nothing to add to res->music_files
     }   	
 
     int senderIdx = 0;
@@ -136,18 +137,20 @@ void delta(filestate* receiver, filestate* sender, filestate* res)
     music_file* fileList; 
     fileList = (music_file*) malloc(sizeof(music_file));  
 
+    //sender and receiver list are ordered alphabetically 
     while(senderIdx < senderLength && receiverIdx < receiverLength){
     	//compare music file IDs
         comparison = strcmp(sender->music_files[senderIdx].ID, receiver->music_files[receiverIdx].ID);
 
-    	if(comparison == 0)
+    	if(comparison == 0) // if same, sender's file already exists on the receiver 
     	    senderIdx++;
-    	else if (comparison < 0)
+    	else if (comparison < 0)// if sender's file is alphabetically less receiver, move reciever forward until we find it 
     	    receiverIdx++;
-    	else{
-	        fileCount++;
+    	else{//sender's file must not exist on the receiver. Add it to the list and increment the sender index
+	    fileCount++;
             fileList = (music_file*) realloc(fileList, sizeof(music_file)*(fileCount));  
             fileList[deltaIdx++] = sender->music_files[senderIdx++];
+	    receiverIdx; //MIGHT FAIL IN CASE OF MULTIPLE SAME IDs ON RECEIVER SIDE
         }
     }
 
