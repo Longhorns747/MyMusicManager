@@ -63,10 +63,6 @@ void rcv_message(message* msg, int sock)
 //Send the entire payload in 1 or more packets
 void send_payload(int size, byte* payload, int sock)
 {
-    //Send the metadata
-    //if(send(sock, msg, MESSAGESIZE, 0) != MESSAGESIZE)
-    //    perror("send() sent unexpected number of bytes for metadata");  
-
     byte buffer[BUFSIZE];
 
     int remainingBytes = size;
@@ -117,20 +113,21 @@ void send_music_files(filestate* state, int sock)
     for(int i = 0; i < state->numFiles; i++){
         char* filename = state->music_files[i].filename;
 
-    	int fileSize = 11; //Just puting a random number here
     	//grab each file
-    	char* file = load_file(filename, fileSize); 
+	struct stat fileAttributes;
+    	stat(filename, &fileAttributes);
+    	char* file = load_file(filename, fileAttributes.st_size); 
 
     	//create and send metadata message
     	message msg;
-        create_message(&msg, strlen(filename) + 1 + fileSize , -1, NOT_LAST_PACKET, strlen(filename)); //+1?
-	    send_message(&msg, sock);
+        create_message(&msg,fileAttributes.st_size, -1, NOT_LAST_PACKET, strlen(filename)); //+1?
+	send_message(&msg, sock);
 
         //send the filename payload
-	    send_payload(strlen(filename), filename, sock);
+	send_payload(strlen(filename), filename, sock);
 
-	    //send music file
-        send_payload(fileSize, file, sock);
+	//send music file
+        send_payload(fileAttributes.st_size, file, sock);
     }
 
     //Make the last message
@@ -148,24 +145,29 @@ void rcv_music_files(int sock)
    
     //Keep receiveing until we receive a last packet flag 
     while(!msg.last_message != LAST_PACKET){
-	   //load metadata
+	//receive filename packet
+	char filename[msg.filename_length];
+	recv(sock, &filename, msg.filename_length, 0);	
+		
+	
+	//load metadata
         byte* rcvMsg;
 
         int numBytesExpected = msg.num_bytes;
         int numBytesRecv = 0;
-	    int offset = 0;
+	int offset = 0;
 
-	    //Keep receiving full packets until packet is not full
-	    while(numBytesRecv < (numBytesExpected-BUFSIZE)){
-	        recv(sock, &rcvMsg[BUFSIZE*offset++], BUFSIZE, 0);
-	        numBytesRecv = numBytesRecv + BUFSIZE;
+	//Keep receiving full packets until packet is not full
+	while(numBytesRecv < (numBytesExpected-BUFSIZE)){
+	    recv(sock, &rcvMsg[BUFSIZE*offset++], BUFSIZE, 0);
+	    numBytesRecv = numBytesRecv + BUFSIZE;
 
-	        //Get the last packet expected	
-            recv(sock, &rcvMsg[BUFSIZE*offset], numBytesExpected - numBytesRecv, 0); 
-	        //Now we have the whole file. Save it 
-            save_file(rcvMsg,numBytesExpected,msg.filename_length);
-	        //Next we expect a message packet
-	        rcv_message(&msg, sock);
+	//Get the last packet expected	
+        recv(sock, &rcvMsg[BUFSIZE*offset], numBytesExpected - numBytesRecv, 0); 
+	//Now we have the whole file. Save it 
+        save_file(rcvMsg,numBytesExpected,filename);
+	//Next we expect a message packet
+	rcv_message(&msg, sock);
         }
     }
 }
