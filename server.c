@@ -126,3 +126,8 @@ void diff(int sock)
     delta(&senderIDs, &currState, &diff);
     send_filenames(&diff, sock);
 }
+
+void pull(int sock)
+{
+    printf("Doing a DIFF :O\n");
+}
