@@ -9,7 +9,7 @@
 void setup_serveraddr(sockaddr_in* serverAddr);
 void make_socket(int* sock);
 void list(int sock);
-void leave(int sock);
+void leave(int sock, pthread_t thread);
 void pull(int sock);
 void diff(int sock);
 void *ThreadMain(void *arg);
@@ -20,7 +20,6 @@ struct ThreadArgs{
 
 int main()
 {
-
     int sock;
     make_socket(&sock);
 
@@ -87,7 +86,7 @@ void *ThreadMain(void* threadArgs)
 
         switch(msg.type){
             case LEAVE:
-                leave(clientSock);
+                leave(clientSock, pthread_self());
                 break;
             case LIST:
                 list(clientSock);
@@ -143,7 +142,7 @@ void list(int sock)
     send_filenames(&currState, sock);
 }
 
-void leave(int sock)
+void leave(int sock, pthread_t thread)
 {
     char msg[] = {"Doing a LEAVE :O\n"};
     FILE* file = fopen(LOGNAME, "ab");
@@ -152,6 +151,7 @@ void leave(int sock)
     fclose(file);
 
     close(sock);
+    pthread_cancel(thread);
 }
 
 void pull(int sock)

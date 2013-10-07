@@ -6,6 +6,7 @@
 int setup_connection(sockaddr_in* address);
 void setup_addr(char* IPaddr, sockaddr_in *address);
 int user_prompt();
+void leave(int sock);
 void pull(int sock);
 void list(int sock);
 void diff(int sock);
@@ -34,14 +35,14 @@ int main()
 
 		message msg;
 		
-		//Fill message struct 
+		//Fill message struct
 		create_message(&msg, 0, userChoice, LAST_PACKET, 0);
 		printf("Created message with type: %d\n", msg.type);
 		send_message(&msg, sock);
 
 		switch(msg.type){
 		    case LEAVE:
-		        exit(1);
+		        leave(sock);
 		        break;
 		    case LIST:
 		        list(sock);
@@ -71,6 +72,10 @@ int user_prompt()
 			select = i;
 		}
 	}
+
+	//Fix it with ductape!!!
+	if(!strcmp(selection, "LEAVE"))
+		select = 0;
 
 	return select;
 }
@@ -112,8 +117,14 @@ int setup_connection(sockaddr_in* address)
     return clientSock;
 }
 
+void leave(int sock)
+{
+	close(sock);
+	exit(1);
+}
 
-void pull(int sock){
+void pull(int sock)
+{
     filestate currState;
     update_files(&currState);
     send_ids(&currState, sock);
