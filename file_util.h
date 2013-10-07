@@ -17,10 +17,6 @@ void delta(filestate* receiver, filestate* sender, filestate* res);
 
 byte* load_file(char fileName[], off_t fileSize) //how do I know what the filesize is?
 {
-    struct stat st;
-	stat(fileName, &st);
-	fileSize = st.st_size; 
-
 	//Open an I/O stream to the file
 	FILE* fileStream;
 	fileStream = fopen(fileName, "r");
@@ -39,7 +35,7 @@ byte* load_file(char fileName[], off_t fileSize) //how do I know what the filesi
 	return fileBuf;
 }
 
-void save_file(char* fileBuffer, int fileLength, int filenameLength)
+void save_file(char* fileBuffer, int fileLength, char* filename)
 {
 
 	//SAVE FILE
