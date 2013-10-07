@@ -1,4 +1,5 @@
 #include <sys/stat.h>
+#include <pthread.h>
 #include "data_structs.h"
 #include "file_util.h"
 #include "networking_util.h"
@@ -10,6 +11,11 @@ void make_socket(int* sock);
 void list(int sock);
 void leave(int sock);
 void diff(int sock);
+void *ThreadMain(void *arg);
+
+struct ThreadArgs{
+    int clntSock;
+};
 
 int main()
 {
@@ -32,20 +38,41 @@ int main()
         exit(1);
     }
 
-    /* Accept incoming connection */
-    sockaddr_in clientAddr;
-    unsigned int clntLen;
-    int clientSock;
+    while(1)
+    {
+        /* Accept incoming connection */
+        sockaddr_in clientAddr;
+        unsigned int clntLen;
+        int clientSock;
 
-    clntLen = sizeof(clientAddr);
-    clientSock = accept(sock, (struct sockaddr*) &clientAddr, &clntLen);
+        clntLen = sizeof(clientAddr);
+        clientSock = accept(sock, (struct sockaddr*) &clientAddr, &clntLen);
 
-    if(clientSock < 0){
-        printf("accept() failed :(\n");
-        exit(1);
+        if(clientSock < 0){
+            printf("accept() failed :(\n");
+            exit(1);
+        }
+
+        printf("Client accepted... \n");
+
+        //Get ready to make a thread!
+        struct ThreadArgs *threadArgs = (struct ThreadArgs *) malloc(sizeof(struct ThreadArgs));
+        threadArgs->clntSock = clientSock;
+
+        pthread_t threadID;
+        int rtnVal = pthread_create(&threadID, NULL, ThreadMain, threadArgs);
     }
+    
+    return 0;
+}
 
-    printf("Client accepted... \n");
+void *ThreadMain(void* threadArgs)
+{
+    pthread_detach(pthread_self());
+
+    //Get our socket
+    int clientSock = ((struct ThreadArgs *) threadArgs)->clntSock;
+    free(threadArgs);
 
     //Recieve and handle messages
     while(1){
@@ -72,8 +99,8 @@ int main()
         }
 
     }
-    
-    return 0;
+
+
 }
 
 void make_socket(int* sock)
@@ -141,3 +168,4 @@ void diff(int sock)
     delta(&senderIDs, &currState, &diff);
     send_filenames(&diff, sock);
 }
+

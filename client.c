@@ -34,7 +34,8 @@ int main()
 
 		message msg;
 		
-		create_message(&msg, 0, userChoice, 1, 0);
+		//Fill message struct 
+		create_message(&msg, 0, userChoice, LAST_PACKET);
 		printf("Created message with type: %d\n", msg.type);
 		send_message(&msg, sock);
 
@@ -110,14 +111,16 @@ int setup_connection(sockaddr_in* address)
     return clientSock;
 }
 
+
 void pull(int sock){
     filestate currState;
     update_files(&currState);
     send_ids(&currState, sock);
+    
+    rcv_music_files(sock);	
 
-    //receive 
-    rcv_music_files(sock);
 }
+
 void list(int sock)
 {
 	rcv_filenames(sock);

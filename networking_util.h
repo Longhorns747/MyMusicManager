@@ -14,7 +14,7 @@
 
 typedef struct sockaddr_in sockaddr_in;
 
-void create_message(message* msg, int numBytes, int msgType, int last_message, int filename_length);
+void create_message(message* msg, int numBytes, int msgType, int last_message);
 void send_message(message* msg, int sock);
 void send_payload(int size, byte* payload, int sock);
 void rcv_message(message* msg, int sock);
@@ -25,10 +25,9 @@ void rcv_IDs(filestate* res, int sock);
 void send_music_files(filestate* state, int sock);
 void rcv_music_files(int sock);
 
-void create_message(message* msg, int numBytes, int msgType, int last_message, int filename_length)
+void create_message(message* msg, int numBytes, int msgType, int last_message)
 {
     msg->num_bytes = numBytes;
-    msg->filename_length = filename_length;
     msg->type = msgType;
     msg->last_message = last_message;
 }
@@ -126,6 +125,10 @@ void send_music_files(filestate* state, int sock)
         create_message(&msg, strlen(filename) + 1 + fileSize , -1, NOT_LAST_PACKET, strlen(filename)); //+1?
 	send_message(&msg, sock);
 
+        //message msg;
+        //create_message(&msg, strlen(filename), LIST, 0);
+
+
 	//send music file
         send_payload(msg.num_bytes, file, sock);
     }
@@ -199,20 +202,21 @@ void rcv_filenames(int sock)
     }
 }
 
+//NOTE TO SELF: what if filestate takes up more than one packet?
 void send_ids(filestate* state, int sock)
 {	
     for(int i = 0; i < state->numFiles; i++){
         char* ID = state->music_files[i].ID;
 
         message msg;
-        create_message(&msg, strlen(ID), -1, 0, strlen(ID));
+        create_message(&msg, strlen(ID), -1, 0);
 
         send_payload(&msg, ID, sock);
     }
 
     //Make the last message
     message lastMsg;
-    create_message(&lastMsg, 0, -1, 1, 0);
+    create_message(&lastMsg, 0, -1, LAST_PACKET);
     send_message(&lastMsg, sock);
 }
 
