@@ -145,29 +145,28 @@ void rcv_music_files(int sock)
    
     //Keep receiveing until we receive a last packet flag 
     while(!msg.last_message != LAST_PACKET){
-	//receive filename packet
-	char filename[msg.filename_length];
-	recv(sock, &filename, msg.filename_length, 0);	
-		
+    	//receive filename packet
+    	char filename[msg.filename_length];
+    	recv(sock, &filename, msg.filename_length, 0);	
 	
-	//load metadata
+	    //load metadata
         byte* rcvMsg;
 
         int numBytesExpected = msg.num_bytes;
         int numBytesRecv = 0;
-	int offset = 0;
+	    int offset = 0;
 
-	//Keep receiving full packets until packet is not full
-	while(numBytesRecv < (numBytesExpected-BUFSIZE)){
-	    recv(sock, &rcvMsg[BUFSIZE*offset++], BUFSIZE, 0);
-	    numBytesRecv = numBytesRecv + BUFSIZE;
+    	//Keep receiving full packets until packet is not full
+    	while(numBytesRecv < (numBytesExpected-BUFSIZE)){
+    	    recv(sock, &rcvMsg[BUFSIZE*offset++], BUFSIZE, 0);
+    	    numBytesRecv = numBytesRecv + BUFSIZE;
 
-	//Get the last packet expected	
-        recv(sock, &rcvMsg[BUFSIZE*offset], numBytesExpected - numBytesRecv, 0); 
-	//Now we have the whole file. Save it 
-        save_file(rcvMsg,numBytesExpected,filename);
-	//Next we expect a message packet
-	rcv_message(&msg, sock);
+        	//Get the last packet expected	
+            recv(sock, &rcvMsg[BUFSIZE*offset], numBytesExpected - numBytesRecv, 0); 
+    	    //Now we have the whole file. Save it 
+            save_file(rcvMsg, filename);
+    	    //Next we expect a message packet
+    	    rcv_message(&msg, sock);
         }
     }
 }
