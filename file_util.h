@@ -138,14 +138,27 @@ void delta(filestate* receiver, filestate* sender, filestate* res)
     {
         for(j = 0; j < receiverLength; j++)
     	{
-       	    if(!strcmp(sender->music_files[i].ID, receiver->music_files[j].ID))
+	    printf("Now comparing %s to %s\n",sender->music_files[i].filename , receiver->music_files[j].filename);
+       	    if(strcmp(sender->music_files[i].ID, receiver->music_files[j].ID) == 0)
 	    {
-	        fileList = (music_file*) realloc(fileList, sizeof(music_file)*(fileCount++));  
+	        fileList = (music_file*) realloc(fileList, sizeof(music_file)*(++fileCount));  
                 fileList[fileCount-1] = sender->music_files[i];
 		break;	
 	    }	
 	}
     }	
+    
+    for(int i = 0; i < fileCount; i++){
+        printf("Diff %d: %s\n", i, fileList[i].filename);
+    }
+
+    res->numFiles = fileCount;
+    res->music_files = fileList;
+}
+
+
+
+
 
     //Commented out this algorithm. Use it if file ids are sorted 
 
@@ -172,13 +185,4 @@ void delta(filestate* receiver, filestate* sender, filestate* res)
     //    fileList = (music_file*) realloc(fileList, sizeof(music_file)*(fileCount));  
     //	fileList[deltaIdx++] = sender->music_files[senderIdx++];
     //}
-    
-    for(int i = 0; i < fileCount; i++){
-        printf("Diff %d: %s\n", i, fileList[i].filename);
-    }
-
-    res->numFiles = fileCount;
-    res->music_files = fileList;
-}
-
 #endif
