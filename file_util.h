@@ -17,8 +17,8 @@ void delta(filestate* receiver, filestate* sender, filestate* res);
 
 byte* load_file(char fileName[], off_t fileSize) //how do I know what the filesize is?
 {
-        struct stat st;
-	stat(filename, &st);
+    struct stat st;
+	stat(fileName, &st);
 	fileSize = st.st_size; 
 
 	//Open an I/O stream to the file

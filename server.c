@@ -10,6 +10,7 @@ void setup_serveraddr(sockaddr_in* serverAddr);
 void make_socket(int* sock);
 void list(int sock);
 void leave(int sock);
+void pull(int sock);
 void diff(int sock);
 void *ThreadMain(void *arg);
 
@@ -153,7 +154,7 @@ void pull(int sock)
     update_files(&currState);
     rcv_IDs(&senderIDs, sock);
     delta(&senderIDs, &currState, &diff);
-    send_music_files(sock);
+    send_music_files(&diff, sock);
 }
 
 void diff(int sock)
