@@ -22,7 +22,7 @@ void send_filenames(filestate* state, int sock);
 void rcv_filenames(int sock);
 void send_ids(filestate* state, int sock);
 void rcv_IDs(filestate* res, int sock);
-void send_music_files(int sock);
+void send_music_files(filestate* state, int sock);
 void rcv_music_files(int sock);
 
 void create_message(message* msg, int numBytes, int msgType, int last_message, int filename_length)
