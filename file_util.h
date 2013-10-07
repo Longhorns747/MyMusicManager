@@ -138,11 +138,12 @@ void delta(filestate* receiver, filestate* sender, filestate* res)
     {
         for(j = 0; j < receiverLength; j++)
     	{
-       	    if(!strcmp(sender->music_files[i].ID, receiver->music_files[j].ID)
+       	    if(!strcmp(sender->music_files[i].ID, receiver->music_files[j].ID))
 	    {
 	        fileList = (music_file*) realloc(fileList, sizeof(music_file)*(fileCount++));  
                 fileList[fileCount-1] = sender->music_files[i];
-		break;		
+		break;	
+	    }	
 	}
     }	
 
