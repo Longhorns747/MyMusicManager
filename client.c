@@ -49,8 +49,9 @@ int main()
 		    case DIFF:
 		    	diff(sock);
 		    	break;
-		    default:
-			pull(sock);
+		    case PULL:
+		        pull(sock);
+                break;
 		}
 	}
 
