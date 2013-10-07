@@ -35,12 +35,10 @@ byte* load_file(char fileName[], off_t fileSize) //how do I know what the filesi
 	return fileBuf;
 }
 
-void save_file(char* fileBuffer, int fileLength, char* filename)
+void save_file(byte* fileBuffer, char* filename)
 {
-
-	//SAVE FILE
-
-
+    FILE* file = fopen(filename, "wb");
+    fwrite(fileBuffer, sizeof(byte), sizeof(fileBuffer), file);
 }
 
 byte* get_unique_id(char fileName[], off_t fileSize)

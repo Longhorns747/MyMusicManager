@@ -95,8 +95,9 @@ void *ThreadMain(void* threadArgs)
             case DIFF:
                 diff(clientSock);
                 break;
-	    default:
-		pull(clientSock);
+	        case PULL:
+		        pull(clientSock);
+                break;
         }
 
     }
