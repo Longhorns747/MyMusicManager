@@ -32,6 +32,7 @@ typedef struct
 	int type; //Enum for message type
 	int num_bytes; //The number of bytes to be sent
 	int last_message; //Is this the last message from the sender?
+	int filename_length;
 } message;
 
 #endif

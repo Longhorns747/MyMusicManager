@@ -14,7 +14,7 @@
 
 typedef struct sockaddr_in sockaddr_in;
 
-void create_message(message* msg, int numBytes, int msgType, int last_message);
+void create_message(message* msg, int numBytes, int msgType, int last_message, int filename_length);
 void send_message(message* msg, int sock);
 void send_payload(int size, byte* payload, int sock);
 void rcv_message(message* msg, int sock);
@@ -25,18 +25,19 @@ void rcv_IDs(filestate* res, int sock);
 void send_music_files(filestate* state, int sock);
 void rcv_music_files(int sock);
 
-void create_message(message* msg, int numBytes, int msgType, int last_message)
+void create_message(message* msg, int numBytes, int msgType, int last_message, int filename_length)
 {
     msg->num_bytes = numBytes;
     msg->type = msgType;
     msg->last_message = last_message;
+    msg->filename_length = filename_length;
 }
 
 void send_message(message* msg, int sock)
 {
     ssize_t len = sizeof(message);
 
-    send(sock, msg, len, 0);
+    send(sock, &msg, len, 0);
 }
 
 void rcv_message(message* msg, int sock)
@@ -118,19 +119,18 @@ void send_music_files(filestate* state, int sock)
 
 	int fileSize = 11; //Just puting a random number here
 	//grab each file
-	char* file = load_file(&filename, fileSize); //HOW DO YOU FIND FILESIZE?
+	char* file = load_file(&filename); 
 
 	//create and send metadata message
 	message msg;
         create_message(&msg, strlen(filename) + 1 + fileSize , -1, NOT_LAST_PACKET, strlen(filename)); //+1?
 	send_message(&msg, sock);
 
-        //message msg;
-        //create_message(&msg, strlen(filename), LIST, 0);
-
+        //send the filename payload
+	send_payload(strlen(filename), &filename, sock);
 
 	//send music file
-        send_payload(msg.num_bytes, file, sock);
+        send_payload(fileSize, &file, sock);
     }
 
     //Make the last message
@@ -149,7 +149,7 @@ void rcv_music_files(int sock)
     //Keep receiveing until we receive a last packet flag 
     while(!msg.last_message != LAST_PACKET){
 	//load metadata
-        byte rcvMsg;
+        byte* rcvMsg;
 
         int numBytesExpected = msg.num_bytes;
         int numBytesRecv = 0;
@@ -163,7 +163,7 @@ void rcv_music_files(int sock)
 	//Get the last packet expected	
         recv(sock, &rcvMsg[BUFSIZE*offset], numBytesExpected - numBytesRecv, 0); 
 	//Now we have the whole file. Save it 
-        save_file(&rcvMsg,numBytesExpected,msg.filename_length);
+        save_file(rcvMsg,numBytesExpected,msg.filename_length);
 	//Next we expect a message packet
 	rcv_message(&msg, sock);
     }
@@ -209,14 +209,14 @@ void send_ids(filestate* state, int sock)
         char* ID = state->music_files[i].ID;
 
         message msg;
-        create_message(&msg, strlen(ID), -1, 0);
+        create_message(&msg, strlen(ID), -1, NOT_LAST_PACKET, 0);
 
-        send_payload(&msg, ID, sock);
+        send_payload(strlen(ID), ID, sock);
     }
 
     //Make the last message
     message lastMsg;
-    create_message(&lastMsg, 0, -1, LAST_PACKET);
+    create_message(&lastMsg, 0, -1, LAST_PACKET, 0);
     send_message(&lastMsg, sock);
 }
 

@@ -35,7 +35,7 @@ int main()
 		message msg;
 		
 		//Fill message struct 
-		create_message(&msg, 0, userChoice, LAST_PACKET);
+		create_message(&msg, 0, userChoice, LAST_PACKET, 0);
 		printf("Created message with type: %d\n", msg.type);
 		send_message(&msg, sock);
 

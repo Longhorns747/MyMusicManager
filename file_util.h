@@ -17,11 +17,15 @@ void delta(filestate* receiver, filestate* sender, filestate* res);
 
 byte* load_file(char fileName[], off_t fileSize) //how do I know what the filesize is?
 {
+        struct stat st;
+	stat(filename, &st);
+	fileSize = st.st_size; 
+
 	//Open an I/O stream to the file
 	FILE* fileStream;
 	fileStream = fopen(fileName, "r");
 	int currChar = fgetc(fileStream);
-	byte* fileBuf = malloc( fileSize+(strlen(fileName)*sizeof(char)));
+	byte* fileBuf = malloc(fileSize);
 
 	int i = 0;
 	while(currChar != EOF)
@@ -32,9 +36,6 @@ byte* load_file(char fileName[], off_t fileSize) //how do I know what the filesi
 	}
 
 	fclose(fileStream);
-
-	//add filename to end of payload 
-	memcopy(fileBuf[fileSize], fileName, strlen(fileName)); 
 	return fileBuf;
 }
 
