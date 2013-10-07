@@ -131,16 +131,16 @@ void delta(filestate* receiver, filestate* sender, filestate* res)
 
     music_file* fileList; 
     fileList = (music_file*) malloc(sizeof(music_file));  
-
+    printf("FIles in sender and receiver %d vs %d\n",sender->numFiles , receiver->numFiles);
     int i;
     int j;
     int found = 0;
     for(i = 0; i < senderLength; i++)
     {
+	found = 0;
         for(j = 0; j < receiverLength; j++)
     	{
-	    found = 0;
-	    printf("Now comparing %s to %s\n",sender->music_files[i].filename , receiver->music_files[j].filename);
+	    printf("Now comparing %s to %s\n",sender->music_files[i].ID , receiver->music_files[j].ID);
        	    if(strcmp(sender->music_files[i].ID, receiver->music_files[j].ID) == 0)
 	    {
 	        found = 1;
@@ -162,32 +162,4 @@ void delta(filestate* receiver, filestate* sender, filestate* res)
 }
 
 
-
-
-
-    //Commented out this algorithm. Use it if file ids are sorted 
-
-    ////sender and receiver list are ordered alphabetically 
-    //while(senderIdx < senderLength && receiverIdx < receiverLength){
-    //	//compare music file IDs
-    //    comparison = strcmp(sender->music_files[senderIdx].ID, receiver->music_files[receiverIdx].ID);
-    //
-    //	if(comparison == 0) // if same, sender's file already exists on the receiver 
-    //	    senderIdx++;
-    //	else if (comparison < 0)// if sender's file is alphabetically less receiver, move reciever forward until we find it 
-    //	    receiverIdx++;
-    //	else{//sender's file must not exist on the receiver. Add it to the list and increment the sender index
-    //    fileCount++;
-      //      fileList = (music_file*) realloc(fileList, sizeof(music_file)*(fileCount));  
-     //       fileList[deltaIdx++] = sender->music_files[senderIdx++];
-	//    receiverIdx; //MIGHT FAIL IN CASE OF MULTIPLE SAME IDs ON RECEIVER SIDE
-      //  }
-    //}
-
-    //add the extra elements from the sender 
-    //while(senderIdx < senderLength){
-    //	fileCount++;
-    //    fileList = (music_file*) realloc(fileList, sizeof(music_file)*(fileCount));  
-    //	fileList[deltaIdx++] = sender->music_files[senderIdx++];
-    //}
 #endif

@@ -161,13 +161,14 @@ void pull(int sock)
 void diff(int sock)
 {
     printf("Doing a DIFF :O\n");
-    filestate currState;
-    filestate senderIDs;
+    filestate serverState;
+    filestate clientState;
     filestate diff;
 
-    update_files(&currState);
-    rcv_IDs(&senderIDs, sock);
-    delta(&senderIDs, &currState, &diff);
+    update_files(&serverState);
+    rcv_IDs(&clientState, sock);
+    printf("The client state currently has %d files", clientState.numFiles);
+    delta(&clientState, &serverState, &diff);
     send_filenames(&diff, sock);
 }
 

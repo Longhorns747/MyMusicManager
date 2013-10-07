@@ -97,7 +97,7 @@ void send_filenames(filestate* state, int sock)
         create_message(&msg, strlen(filename), -1, NOT_LAST_PACKET, strlen(filename)); //+1 for '/0'?
     	send_message(&msg, sock);
 
-	    //send filename
+	//send filename
         send_payload(msg.num_bytes, filename, sock);
     }
 
@@ -207,13 +207,16 @@ void rcv_filenames(int sock)
 //NOTE TO SELF: what if filestate takes up more than one packet?
 void send_ids(filestate* state, int sock)
 {	
+    printf("Send IDs is preparing to send IDs");
     for(int i = 0; i < state->numFiles; i++){
         char* ID = state->music_files[i].ID;
 
         message msg;
         create_message(&msg, strlen(ID), -1, NOT_LAST_PACKET, 0);
+	send_message(&msg, sock);
 
         send_payload(strlen(ID), ID, sock);
+	printf("Send IDs is sending an ID!");
     }
 
     //Make the last message
@@ -237,9 +240,9 @@ void rcv_IDs(filestate* res, int sock)
         fileList = (music_file*) realloc(fileList, sizeof(music_file)*(count + 1)); 
 
         //Recieve ID from server
-        byte ID[msg.num_bytes + 1];
+        byte ID[msg.num_bytes];
         
-        memset(ID, 0, msg.num_bytes + 1);
+        //memset(ID, 0, msg.num_bytes + 1);
         ssize_t bytesRecieved;
         int totalBytes = 0;
 
@@ -252,7 +255,6 @@ void rcv_IDs(filestate* res, int sock)
             totalBytes += bytesRecieved;
         }
 
-        ID[msg.num_bytes] = '\0';
         music_file* currFile = (music_file*) malloc(sizeof(music_file));
         currFile->ID = (unsigned char *) malloc(sizeof(ID));
         memcpy(currFile->ID, ID, sizeof(ID));
@@ -263,6 +265,7 @@ void rcv_IDs(filestate* res, int sock)
         rcv_message(&msg, sock);
     }
 
+    printf("Rcv_IDS is showing %d files", count);
     res->music_files = fileList;
     res->numFiles = count;
 }
