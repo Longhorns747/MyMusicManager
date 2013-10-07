@@ -28,13 +28,13 @@ int main()
 
     /* Bind to local address structure */
     if(bind(sock, (struct sockaddr*) &serverAddr, sizeof(serverAddr)) < 0){
-        printf("bind() failed :(\n");
+        printf("server/main: bind() failed :(\n");
         exit(1);
     }
 
     /* Listen for incoming connections */
     if(listen(sock, MAX_PENDING)){
-        printf("listen() failed :(\n");
+        printf("server/main: listen() failed :(\n");
         exit(1);
     }
 
@@ -49,11 +49,11 @@ int main()
         clientSock = accept(sock, (struct sockaddr*) &clientAddr, &clntLen);
 
         if(clientSock < 0){
-            printf("accept() failed :(\n");
+            printf("server/main:accept() failed :(\n");
             exit(1);
         }
 
-        printf("Client accepted... \n");
+        printf("server/main: Client accepted... \n");
 
         //Get ready to make a thread!
         struct ThreadArgs *threadArgs = (struct ThreadArgs *) malloc(sizeof(struct ThreadArgs));
@@ -77,10 +77,10 @@ void *ThreadMain(void* threadArgs)
     //Recieve and handle messages
     while(1){
         message msg;
-        printf("Ready to recieve messages!\n");
+        printf("server/ThreadMain: Ready to recieve messages!\n");
         
         rcv_message(&msg, clientSock);
-        printf("Whoa a message! Type: %d\n", msg.type);
+        printf("server/ThreadMain: Whoa a message! Type: %d\n", msg.type);
         if(msg.type == -1)
             continue;
 
@@ -109,7 +109,7 @@ void make_socket(int* sock)
     /* Create new TCP Socket for incoming requests*/
     in_port_t serverPort = htons(PORT);
     if((*sock = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP)) < 0){
-        printf("socket() failed :(\n");
+        printf("server/make_socket: socket() failed :(\n");
     }
 
     //Set socket options so that we can release the port
@@ -130,7 +130,7 @@ void setup_serveraddr(sockaddr_in* serverAddr)
 
 void list(int sock)
 {
-    char msg[] = {"Doing a LIST :O\n"};
+    char msg[] = {"server/list: Doing a LIST :O\n"};
     FILE* file = fopen(LOGNAME, "ab");
     fputs(msg, file);
     printf("%s", msg);
@@ -144,7 +144,7 @@ void list(int sock)
 
 void leave(int sock, pthread_t thread)
 {
-    char msg[] = {"Doing a LEAVE :O\n"};
+    char msg[] = {"server/leave: Doing a LEAVE :O\n"};
     FILE* file = fopen(LOGNAME, "ab");
     fputs(msg, file);
     printf("%s", msg);
@@ -156,7 +156,7 @@ void leave(int sock, pthread_t thread)
 
 void pull(int sock)
 {
-    char msg[] = {"Doing a PULL :O\n"};
+    char msg[] = {"server/pull: Doing a PULL :O\n"};
     FILE* file = fopen(LOGNAME, "ab");
     fputs(msg, file);
     fclose(file);
@@ -174,7 +174,7 @@ void pull(int sock)
 
 void diff(int sock)
 {
-    char msg[] = {"Doing a DIFF :O\n"};
+    char msg[] = {"server/diff: Doing a DIFF :O\n"};
     FILE* file = fopen(LOGNAME, "ab");
     fputs(msg, file);
     fclose(file);
@@ -185,8 +185,17 @@ void diff(int sock)
     filestate diff;
 
     update_files(&serverState);
+
+    int e;
+    printf("\n");
+    for(e = 0; e <serverState.numFiles; e++){
+	printf("server/diff: %s maps to %s\n",serverState.music_files[e].ID, serverState.music_files[e].filename);
+
+
+    }	
+
     rcv_IDs(&clientState, sock);
-    printf("The client state currently has %d files", clientState.numFiles);
+    printf("server/diff: The client state currently has %d files\n", clientState.numFiles);
     delta(&clientState, &serverState, &diff);
     send_filenames(&diff, sock);
 }

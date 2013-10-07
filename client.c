@@ -91,7 +91,7 @@ void setup_addr(char* IPaddr, sockaddr_in *address)
     //Formatting and setting the IP address
     int rtnVal = inet_pton(AF_INET, IPaddr, &(address->sin_addr.s_addr));
     if(rtnVal <= 0){
-        printf("inet_pton failed :(\n");
+        printf("client/setup_addr: inet_pton failed :(\n");
         exit(1);
     }
 

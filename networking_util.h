@@ -207,7 +207,7 @@ void rcv_filenames(int sock)
 //NOTE TO SELF: what if filestate takes up more than one packet?
 void send_ids(filestate* state, int sock)
 {	
-    printf("Send IDs is preparing to send IDs");
+    printf("ntwkutil/send_ids: Send IDs is preparing to send IDs\n");
     for(int i = 0; i < state->numFiles; i++){
         char* ID = state->music_files[i].ID;
 
@@ -216,7 +216,7 @@ void send_ids(filestate* state, int sock)
 	send_message(&msg, sock);
 
         send_payload(strlen(ID), ID, sock);
-	printf("Send IDs is sending an ID!");
+	printf("ntwkutil/send_ids: Send IDs is sending an ID!\n");
     }
 
     //Make the last message
@@ -227,7 +227,7 @@ void send_ids(filestate* state, int sock)
 
 void rcv_IDs(filestate* res, int sock)
 {
-    printf("Waiting for file IDs...\n");
+    printf("ntwkutil/rcv_ids:  Waiting for file IDs...\n");
     message msg;
     rcv_message(&msg, sock);
     int count = 0;
@@ -250,7 +250,7 @@ void rcv_IDs(filestate* res, int sock)
             bytesRecieved = recv(sock, ID, msg.num_bytes, 0);
 
             if(bytesRecieved < 0)
-                printf("Couldn't recieve ID :(");
+                printf("ntwkutil/rcv_ids: Couldn't recieve ID :(\n");
 
             totalBytes += bytesRecieved;
         }
@@ -265,7 +265,7 @@ void rcv_IDs(filestate* res, int sock)
         rcv_message(&msg, sock);
     }
 
-    printf("Rcv_IDS is showing %d files", count);
+    printf("ntwkutil/rcv_ids: Rcv_IDS is showing %d files\n", count);
     res->music_files = fileList;
     res->numFiles = count;
 }

@@ -1,7 +1,7 @@
 #ifndef FILE_UTIL_H
 #define FILE_UTIL_H
  
-#include <openssl/sha.h>
+#include <openssl/md5.h>
 #include <dirent.h>
 #include <sys/stat.h>
 #include <string.h>
@@ -21,18 +21,11 @@ byte* load_file(char fileName[], off_t fileSize) //how do I know what the filesi
 {
 	//Open an I/O stream to the file
 	FILE* fileStream;
-	fileStream = fopen(fileName, "r");
-	int currChar = fgetc(fileStream);
-	byte* fileBuf = malloc(fileSize);
+	fileStream = fopen(fileName, "rb");
+	byte* fileBuf = (byte *)malloc(sizeof(byte)*fileSize);
 
-	int i = 0;
-	while(currChar != EOF)
-	{
-		fileBuf[i] = (byte)currChar;
-		currChar = fgetc(fileStream);
-		i++;
-	}
-
+	fread(fileBuf, sizeof(byte), fileSize, fileStream); 
+        
 	fclose(fileStream);
 	return fileBuf;
 }
@@ -45,14 +38,25 @@ void save_file(byte* fileBuffer, char* filename)
 
 byte* get_unique_id(char fileName[], off_t fileSize)
 { 
-
+	//printf("FILENAME: %s filesize: %d\n", fileName, fileSize);
+	byte* c = (byte *) malloc(sizeof(byte) * MD5_DIGEST_LENGTH);
 	byte* payload;
 	payload = load_file(fileName, fileSize);
 
-	byte* hash;
-	hash = (char *) malloc(sizeof(char) * 20);
-	SHA1(payload, sizeof(payload), hash);
-	return hash;
+	FILE *inFile = fopen(fileName,"rb");
+	MD5_CTX mdContext;
+	int bytes;
+	byte data[1024];
+	
+	if(inFile == NULL){
+	    exit(1);
+	}
+	MD5_Init(&mdContext);
+	while((bytes = fread(data, 1, 1024, inFile)) != 0){
+	    MD5_Update(&mdContext, data, bytes);
+	}
+	MD5_Final(c, &mdContext);
+	return c;
 }
 
 //Needed for the scandir function used below
@@ -75,12 +79,9 @@ int update_files(filestate* state)
 
     int numFiles = scandir("./", &files, findMusic, alphasort);
 
-    printf("Scanned directory\n");
-
     music_file *fileList;
     fileList=(music_file*) malloc(numFiles * sizeof(music_file));
-    printf("Allocated space for %d files\n", numFiles);
-
+  
     if(numFiles >= 0)
     {
     	for(int i = 0; i < numFiles; i++)
@@ -114,7 +115,7 @@ void delta(filestate* receiver, filestate* sender, filestate* res)
 
     //if the receiver has no files, go ahead and send everything
     if(receiverLength == 0){
-	    res->numFiles = senderLength;
+	res->numFiles = senderLength;
         res->music_files = sender->music_files;
     }
 
@@ -128,7 +129,6 @@ void delta(filestate* receiver, filestate* sender, filestate* res)
 
     music_file* fileList; 
     fileList = (music_file*) malloc(sizeof(music_file));  
-    printf("FIles in sender and receiver %d vs %d\n",sender->numFiles , receiver->numFiles);
     int i;
     int j;
     int found = 0;
@@ -139,8 +139,7 @@ void delta(filestate* receiver, filestate* sender, filestate* res)
         for(j = 0; j < receiverLength; j++)
     	{
 	    found = 0;
-	    printf("Now comparing %s to %s\n",sender->music_files[i].filename , receiver->music_files[j].filename);
-       	    if(strcmp(sender->music_files[i].ID, receiver->music_files[j].ID) == 0){
+       	    if(!memcmp(sender->music_files[i].ID, receiver->music_files[j].ID, sizeof(sender->music_files[i].ID))){
 	        found = 1;
 	        break;	
 	    }
@@ -153,7 +152,7 @@ void delta(filestate* receiver, filestate* sender, filestate* res)
     }	
     
     for(int i = 0; i < fileCount; i++){
-        printf("Diff %d: %s\n", i, fileList[i].filename);
+        printf("file_util.h/delta: Diff %d: %s\n", i, fileList[i].filename);
     }
 
     res->numFiles = fileCount;
