@@ -131,7 +131,11 @@ void setup_serveraddr(sockaddr_in* serverAddr)
 
 void list(int sock)
 {
-    printf("Doing a LIST :O\n");
+    char msg[] = {"Doing a LIST :O\n"};
+    FILE* file = fopen(LOGNAME, "ab");
+    fputs(msg, file);
+    printf("%s", msg);
+    fclose(file);
 
     //Get current filestate
     filestate currState;
@@ -141,13 +145,23 @@ void list(int sock)
 
 void leave(int sock)
 {
-    printf("Doing a LEAVE :O\n");
+    char msg[] = {"Doing a LEAVE :O\n"};
+    FILE* file = fopen(LOGNAME, "ab");
+    fputs(msg, file);
+    printf("%s", msg);
+    fclose(file);
+
     close(sock);
 }
 
 void pull(int sock)
 {
-    printf("Doing a PULL :O\n");
+    char msg[] = {"Doing a PULL :O\n"};
+    FILE* file = fopen(LOGNAME, "ab");
+    fputs(msg, file);
+    fclose(file);
+
+    printf("%s", msg);
     filestate currState;
     filestate senderIDs;
     filestate diff;
@@ -160,7 +174,12 @@ void pull(int sock)
 
 void diff(int sock)
 {
-    printf("Doing a DIFF :O\n");
+    char msg[] = {"Doing a DIFF :O\n"};
+    FILE* file = fopen(LOGNAME, "ab");
+    fputs(msg, file);
+    fclose(file);
+
+    printf("%s", msg);
     filestate currState;
     filestate senderIDs;
     filestate diff;

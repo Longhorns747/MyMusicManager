@@ -7,6 +7,8 @@
 #include <string.h>
 #include "data_structs.h"
 
+#define LOGNAME "log.txt"
+
 typedef unsigned char byte;
 
 int alphasort(const struct dirent ** a, const struct dirent **b);
@@ -140,7 +142,7 @@ void delta(filestate* receiver, filestate* sender, filestate* res)
     	{
        	    if(!strcmp(sender->music_files[i].ID, receiver->music_files[j].ID))
 	    {
-	        fileList = (music_file*) realloc(fileList, sizeof(music_file)*(fileCount++));  
+	        fileList = (music_file*) realloc(fileList, sizeof(music_file)*(++fileCount));  
                 fileList[fileCount-1] = sender->music_files[i];
 		break;	
 	    }	
