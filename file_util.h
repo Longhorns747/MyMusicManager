@@ -134,17 +134,22 @@ void delta(filestate* receiver, filestate* sender, filestate* res)
 
     int i;
     int j;
+    int found = 0;
     for(i = 0; i < senderLength; i++)
     {
         for(j = 0; j < receiverLength; j++)
     	{
+	    found = 0;
 	    printf("Now comparing %s to %s\n",sender->music_files[i].filename , receiver->music_files[j].filename);
        	    if(strcmp(sender->music_files[i].ID, receiver->music_files[j].ID) == 0)
 	    {
-	        fileList = (music_file*) realloc(fileList, sizeof(music_file)*(++fileCount));  
-                fileList[fileCount-1] = sender->music_files[i];
+	        found = 1;
 		break;	
 	    }	
+	}
+	if(!found){
+	    fileList = (music_file*) realloc(fileList, sizeof(music_file)*(++fileCount));
+            fileList[fileCount-1] = sender->music_files[i];
 	}
     }	
     
