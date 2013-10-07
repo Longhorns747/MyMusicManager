@@ -7,6 +7,8 @@
 #include <string.h>
 #include "data_structs.h"
 
+#define LOGNAME "log.txt"
+
 typedef unsigned char byte;
 
 int alphasort(const struct dirent ** a, const struct dirent **b);
@@ -120,14 +122,9 @@ void delta(filestate* receiver, filestate* sender, filestate* res)
     if(senderLength == 0){
     	res->numFiles = 0;
 	//Nothing to add to res->music_files
-    }   	
-
-    //int senderIdx = 0;
-    //int receiverIdx = 0;
-    //int deltaIdx = 0;
+    }
 
     int fileCount = 0;
-    //int comparison;
 
     music_file* fileList; 
     fileList = (music_file*) malloc(sizeof(music_file));  
@@ -135,21 +132,23 @@ void delta(filestate* receiver, filestate* sender, filestate* res)
     int i;
     int j;
     int found = 0;
+
     for(i = 0; i < senderLength; i++)
     {
 	found = 0;
         for(j = 0; j < receiverLength; j++)
     	{
-	    printf("Now comparing %s to %s\n",sender->music_files[i].ID , receiver->music_files[j].ID);
-       	    if(strcmp(sender->music_files[i].ID, receiver->music_files[j].ID) == 0)
-	    {
+	    found = 0;
+	    printf("Now comparing %s to %s\n",sender->music_files[i].filename , receiver->music_files[j].filename);
+       	    if(strcmp(sender->music_files[i].ID, receiver->music_files[j].ID) == 0){
 	        found = 1;
-		break;	
-	    }	
+	        break;	
+	    }
 	}
+
 	if(!found){
-	    fileList = (music_file*) realloc(fileList, sizeof(music_file)*(++fileCount));
-            fileList[fileCount-1] = sender->music_files[i];
+	        fileList = (music_file*) realloc(fileList, sizeof(music_file)*(++fileCount));
+                fileList[fileCount-1] = sender->music_files[i];
 	}
     }	
     

@@ -9,7 +9,7 @@
 void setup_serveraddr(sockaddr_in* serverAddr);
 void make_socket(int* sock);
 void list(int sock);
-void leave(int sock);
+void leave(int sock, pthread_t thread);
 void pull(int sock);
 void diff(int sock);
 void *ThreadMain(void *arg);
@@ -20,7 +20,6 @@ struct ThreadArgs{
 
 int main()
 {
-
     int sock;
     make_socket(&sock);
 
@@ -87,7 +86,7 @@ void *ThreadMain(void* threadArgs)
 
         switch(msg.type){
             case LEAVE:
-                leave(clientSock);
+                leave(clientSock, pthread_self());
                 break;
             case LIST:
                 list(clientSock);
@@ -131,7 +130,11 @@ void setup_serveraddr(sockaddr_in* serverAddr)
 
 void list(int sock)
 {
-    printf("Doing a LIST :O\n");
+    char msg[] = {"Doing a LIST :O\n"};
+    FILE* file = fopen(LOGNAME, "ab");
+    fputs(msg, file);
+    printf("%s", msg);
+    fclose(file);
 
     //Get current filestate
     filestate currState;
@@ -139,15 +142,26 @@ void list(int sock)
     send_filenames(&currState, sock);
 }
 
-void leave(int sock)
+void leave(int sock, pthread_t thread)
 {
-    printf("Doing a LEAVE :O\n");
+    char msg[] = {"Doing a LEAVE :O\n"};
+    FILE* file = fopen(LOGNAME, "ab");
+    fputs(msg, file);
+    printf("%s", msg);
+    fclose(file);
+
     close(sock);
+    pthread_cancel(thread);
 }
 
 void pull(int sock)
 {
-    printf("Doing a PULL :O\n");
+    char msg[] = {"Doing a PULL :O\n"};
+    FILE* file = fopen(LOGNAME, "ab");
+    fputs(msg, file);
+    fclose(file);
+
+    printf("%s", msg);
     filestate currState;
     filestate senderIDs;
     filestate diff;
@@ -160,7 +174,12 @@ void pull(int sock)
 
 void diff(int sock)
 {
-    printf("Doing a DIFF :O\n");
+    char msg[] = {"Doing a DIFF :O\n"};
+    FILE* file = fopen(LOGNAME, "ab");
+    fputs(msg, file);
+    fclose(file);
+
+    printf("%s", msg);
     filestate serverState;
     filestate clientState;
     filestate diff;
