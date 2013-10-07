@@ -110,29 +110,13 @@ int setup_connection(sockaddr_in* address)
     return clientSock;
 }
 
-void pull(int numBytes, int sock)
-{
-	//TODO: handle filename. FIlename should be at the beginning of each mp3 file payload 	
-    char file[numBytes]; //maybe make this a file type?
-    int numBytesRecv = 0;
-    byte rcvMsg;
-
-    while(numBytesRecv < (numBytes-BUFSIZE)){
-		recv(sock, &rcvMsg, BUFSIZE, 0);
-		//memcpy(file[numBytesRecv], rcvMsg, BUFSIZE);
-    }
-
-    //grab the rest of the bytes
-    recv(sock, &rcvMsg, BUFSIZE - numBytesRecv, 0);
-    //memcpy(file[numBytesRecv], rcvMsg, BUFSIZE - numBytesRecv);
-
-    //at this point we have the entire music file. Store it in memory somehow
-}
 void pull(int sock){
+    filestate currState;
+    update_files(&currState);
+    send_ids(&currState, sock);
 
-
-
-
+    //receive 
+    rcv_music_files(sock);
 }
 void list(int sock)
 {

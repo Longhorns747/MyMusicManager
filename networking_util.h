@@ -6,6 +6,8 @@
 #include <string.h>
 #include "data_structs.h"
 
+#define LAST_PACKET 1
+#define NOT_LAST_PACKET 0
 #define PORT 2222
 #define BUFSIZE 1500
 #define MESSAGESIZE sizeof(message)
@@ -14,12 +16,14 @@ typedef struct sockaddr_in sockaddr_in;
 
 void create_message(message* msg, int numBytes, int msgType, int last_message, int filename_length);
 void send_message(message* msg, int sock);
-void send_payload(message* msg, byte* payload, int sock);
+void send_payload(int size, byte* payload, int sock);
 void rcv_message(message* msg, int sock);
 void send_filenames(filestate* state, int sock);
 void rcv_filenames(int sock);
 void send_ids(filestate* state, int sock);
 void rcv_IDs(filestate* res, int sock);
+void send_music_files(int sock);
+void rcv_music_files(int sock);
 
 void create_message(message* msg, int numBytes, int msgType, int last_message, int filename_length)
 {
@@ -56,19 +60,20 @@ void rcv_message(message* msg, int sock)
     memcpy(msg, rcvBuf, sizeof(message));
 }
 
-void send_payload(message* msg, byte* payload, int sock)
+//Send the entire payload in 1 or more packets
+void send_payload(int size, byte* payload, int sock)
 {
     //Send the metadata
-    if(send(sock, msg, MESSAGESIZE, 0) != MESSAGESIZE)
-        perror("send() sent unexpected number of bytes for metadata");  
+    //if(send(sock, msg, MESSAGESIZE, 0) != MESSAGESIZE)
+    //    perror("send() sent unexpected number of bytes for metadata");  
 
     byte buffer[BUFSIZE];
 
-    //Send the payload 1500 (BUFSIZE) bytes at a time
-    int remainingBytes = msg->num_bytes;
+    int remainingBytes = size;
     int offset = 0;
     int numSent;
 
+    //Keep sending packets while the number of bytes left is > BUFSIZE
     while(remainingBytes > BUFSIZE){
         numSent = send(sock, &payload[BUFSIZE*offset], BUFSIZE, 0);
 
@@ -84,21 +89,81 @@ void send_payload(message* msg, byte* payload, int sock)
        perror("send() sent unexpected number of bytes of data");       
 }
 
+//
 void send_filenames(filestate* state, int sock)
 {
+    //send a metadata packet for each filename, then send the filename
     for(int i = 0; i < state->numFiles; i++){
         char* filename = state->music_files[i].filename;
 
-        message msg;
-        create_message(&msg, strlen(filename), LIST, 0, strlen(filename));
+	//create and send metadata message
+	message msg;
+        create_message(&msg, strln(filename), -1, NOT_LAST_PACKET, strlen(filename)); //+1 for '/0'?
+	send_message(&msg, sock);
 
-        send_payload(&msg, filename, sock);
+	//send filename
+        send_payload(msg.num_bytes, &filename, sock);
+    }
+
+    //Make the last message to 
+    message lastMsg;
+    create_message(&lastMsg, 0, DIFF, LAST_PACKET, 0);
+    send_message(&lastMsg, sock);
+}
+
+void send_music_files(filestate* state, int sock)
+{
+    //send a metadata packet for each file, then send the file
+    for(int i = 0; i < state->numFiles; i++){
+        char* filename = state->music_files[i].filename;
+
+	int fileSize = 11; //Just puting a random number here
+	//grab each file
+	char* file = load_file(&filename, fileSize); //HOW DO YOU FIND FILESIZE?
+
+	//create and send metadata message
+	message msg;
+        create_message(&msg, strlen(filename) + 1 + fileSize , -1, NOT_LAST_PACKET, strlen(filename)); //+1?
+	send_message(&msg, sock);
+
+	//send music file
+        send_payload(msg.num_bytes, file, sock);
     }
 
     //Make the last message
     message lastMsg;
-    create_message(&lastMsg, 0, LIST, 1, 0);
+    create_message(&lastMsg, 0, PULL, LAST_PACKET, 0);
     send_message(&lastMsg, sock);
+}
+
+
+void rcv_music_files(int sock)
+{
+    printf("Waiting for music files...\n");
+    message msg;
+    rcv_message(&msg, sock);	 
+   
+    //Keep receiveing until we receive a last packet flag 
+    while(!msg.last_message != LAST_PACKET){
+	//load metadata
+        byte rcvMsg;
+
+        int numBytesExpected = msg.num_bytes;
+        int numBytesRecv = 0;
+	int offset = 0;
+
+	//Keep receiving full packets until packet is not full
+	while(numBytesRecv < (numBytesExpected-BUFSIZE)){
+	    recv(sock, &rcvMsg[BUFSIZE*offset++], BUFSIZE, 0);
+	    numBytesRecv = numBytesRecv + BUFSIZE;
+
+	//Get the last packet expected	
+        recv(sock, &rcvMsg[BUFSIZE*offset], numBytesExpected - numBytesRecv, 0); 
+	//Now we have the whole file. Save it 
+        save_file(&rcvMsg,numBytesExpected,msg.filename_length);
+	//Next we expect a message packet
+	rcv_message(&msg, sock);
+    }
 }
 
 void rcv_filenames(int sock)
@@ -135,7 +200,7 @@ void rcv_filenames(int sock)
 }
 
 void send_ids(filestate* state, int sock)
-{
+{	
     for(int i = 0; i < state->numFiles; i++){
         char* ID = state->music_files[i].ID;
 

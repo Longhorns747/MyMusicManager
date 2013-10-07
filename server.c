@@ -67,6 +67,8 @@ int main()
             case DIFF:
                 diff(clientSock);
                 break;
+	    default:
+		pull(clientSock);
         }
 
     }
@@ -112,6 +114,19 @@ void leave(int sock)
 {
     printf("Doing a LEAVE :O\n");
     close(sock);
+}
+
+void pull(int sock)
+{
+    printf("Doing a PULL :O\n");
+    filestate currState;
+    filestate senderIDs;
+    filestate diff;
+
+    update_files(&currState);
+    rcv_IDs(&senderIDs, sock);
+    delta(&senderIDs, &currState, &diff);
+    send_music_files(sock);
 }
 
 void diff(int sock)

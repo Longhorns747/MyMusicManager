@@ -15,13 +15,13 @@ void free_files(filestate* state);
 void delta(filestate* receiver, filestate* sender, filestate* res);
 
 
-byte* load_file(char fileName[], off_t fileSize)
+byte* load_file(char fileName[], off_t fileSize) //how do I know what the filesize is?
 {
 	//Open an I/O stream to the file
 	FILE* fileStream;
 	fileStream = fopen(fileName, "r");
 	int currChar = fgetc(fileStream);
-	byte* fileBuf = malloc(fileSize);
+	byte* fileBuf = malloc( fileSize+(strlen(fileName)*sizeof(char)));
 
 	int i = 0;
 	while(currChar != EOF)
@@ -32,7 +32,18 @@ byte* load_file(char fileName[], off_t fileSize)
 	}
 
 	fclose(fileStream);
+
+	//add filename to end of payload 
+	memcopy(fileBuf[fileSize], fileName, strlen(fileName)); 
 	return fileBuf;
+}
+
+void save_file(char* fileBuffer, int fileLength, int filenameLength)
+{
+
+	//SAVE FILE
+
+
 }
 
 byte* get_unique_id(char fileName[], off_t fileSize)
