@@ -15,7 +15,7 @@ int alphasort(const struct dirent ** a, const struct dirent **b);
 int update_files(filestate* state);
 void free_files(filestate* state);
 void delta(filestate* receiver, filestate* sender, filestate* res);
-
+void save_file(byte* fileBuffer, int fileSize, char* filename);
 
 byte* load_file(char fileName[], off_t fileSize) //how do I know what the filesize is?
 {
@@ -30,10 +30,10 @@ byte* load_file(char fileName[], off_t fileSize) //how do I know what the filesi
 	return fileBuf;
 }
 
-void save_file(byte* fileBuffer, char* filename)
+void save_file(byte* fileBuffer, int fileSize, char* filename)
 {
     FILE* file = fopen(filename, "wb");
-    fwrite(fileBuffer, sizeof(byte), sizeof(fileBuffer), file);
+    fwrite(fileBuffer, sizeof(byte), fileSize*sizeof(byte), file);
 }
 
 byte* get_unique_id(char fileName[], off_t fileSize)

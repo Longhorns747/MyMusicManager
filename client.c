@@ -130,7 +130,7 @@ void pull(int sock)
     send_ids(&currState, sock);
     
     rcv_music_files(sock);	
-
+    printf("rcv_music_files finished receiving\n");
 }
 
 void list(int sock)
