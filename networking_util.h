@@ -112,7 +112,7 @@ void send_music_files(filestate* state, int sock)
         char* filename = state->music_files[i].filename;
 
     	//load each file
-	struct stat fileAttributes;
+	    struct stat fileAttributes;
 
     	stat(filename, &fileAttributes);
     	byte* file = load_file(filename, fileAttributes.st_size); 
@@ -120,15 +120,15 @@ void send_music_files(filestate* state, int sock)
     	//create and send metadata message
     	message msg;
         create_message(&msg,fileAttributes.st_size, -1, NOT_LAST_PACKET, strlen(filename)); //+1?
-	send_message(&msg, sock);
+	    send_message(&msg, sock);
 
         //send the filename payload
-	send_payload(strlen(filename), filename, sock);
+	    send_payload(strlen(filename), filename, sock);
 
-	//send music file
-	printf("ntwkutil/send_music_files: Start sending payload\n");
+    	//send music file
+    	printf("ntwkutil/send_music_files: Start sending payload\n");
         send_payload(fileAttributes.st_size, file, sock);
-	printf("ntwkutil/send_music_files: Finished sending payload\n");
+	    printf("ntwkutil/send_music_files: Finished sending payload\n");
     }
     
     //Make the last message
@@ -150,16 +150,15 @@ void rcv_music_files(int sock)
     	char filename[msg.filename_length];
     	recv(sock, &filename, msg.filename_length, 0);	
 
-    filename[msg.filename_length] = '\0';	
-    printf("Receiving: %s %d...\n", filename, msg.num_bytes);
-	//load metadata
+        filename[msg.filename_length] = '\0';	
+        printf("Receiving: %s %d...\n", filename, msg.num_bytes);
+	    //load metadata
         byte* rcvMsg = (byte *) malloc(sizeof(byte)*msg.num_bytes);
 
         int numBytesExpected = msg.num_bytes;
         int numBytesRecv = 0;
         int totalBytes = 0;
         int remainingBytes = numBytesExpected;
-	int offset = 0;
 
     	//Keep receiving full packets until packet is not full
     	while(totalBytes < (numBytesExpected)){
@@ -167,18 +166,17 @@ void rcv_music_files(int sock)
            //printf("NumBytesRecv: %d\n", numBytesRecv);
            totalBytes += numBytesRecv;
            remainingBytes -= numBytesRecv;
-	}
+	    }
 
 		
         //Get the last packet expected	
         //numBytesRecv += recv(sock, &rcvMsg[BUFSIZE*offset], numBytesExpected - numBytesRecv, 0); 
-	printf("Numbytes received is %d\n", totalBytes);
+	    printf("Numbytes received is %d\n", totalBytes);
         //Now we have the whole file. Save it 
         save_file(rcvMsg, msg.num_bytes, filename);
     	//Next we expect a message packet
     	rcv_message(&msg, sock);
         printf("MsgLast: %d\n", msg.last_message);
-        
     }
 }
 
