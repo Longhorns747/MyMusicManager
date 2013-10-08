@@ -113,10 +113,12 @@ void send_music_files(filestate* state, int sock)
     for(int i = 0; i < state->numFiles; i++){
         char* filename = state->music_files[i].filename;
 
-    	//grab each file
+    	//load each file
 	struct stat fileAttributes;
     	stat(filename, &fileAttributes);
     	char* file = load_file(filename, fileAttributes.st_size); 
+	
+	printf("ntwkutil/send_music_files: File length is %d\n", sizeof(file));
 
     	//create and send metadata message
     	message msg;

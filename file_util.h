@@ -152,7 +152,7 @@ void delta(filestate* receiver, filestate* sender, filestate* res)
     }	
     
     for(int i = 0; i < fileCount; i++){
-        printf("file_util.h/delta: Diff %d: %s\n", i, fileList[i].filename);
+        printf("Diff %d: %s\n", i, fileList[i].filename);
     }
 
     res->numFiles = fileCount;
