@@ -33,7 +33,8 @@ byte* load_file(char fileName[], off_t fileSize) //how do I know what the filesi
 void save_file(byte* fileBuffer, int fileSize, char* filename)
 {
     FILE* file = fopen(filename, "wb");
-    fwrite(fileBuffer, sizeof(byte), fileSize*sizeof(byte), file);
+    fwrite(fileBuffer, sizeof(byte), fileSize, file);
+    fclose(file);
 }
 
 byte* get_unique_id(char fileName[], off_t fileSize)

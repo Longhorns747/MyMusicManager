@@ -173,7 +173,7 @@ void rcv_music_files(int sock)
         //numBytesRecv += recv(sock, &rcvMsg[BUFSIZE*offset], numBytesExpected - numBytesRecv, 0); 
 	printf("Numbytes received is %d\n", totalBytes);
         //Now we have the whole file. Save it 
-        save_file(rcvMsg, totalBytes, filename);
+        save_file(rcvMsg, msg.num_bytes, filename);
     	//Next we expect a message packet
     	rcv_message(&msg, sock);
         
