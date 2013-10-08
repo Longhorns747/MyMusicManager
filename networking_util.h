@@ -153,8 +153,9 @@ void rcv_music_files(int sock)
     	//receive filename packet
     	char filename[msg.filename_length];
     	recv(sock, &filename, msg.filename_length, 0);	
-	
-	printf("Filename received is %s\n", filename);	
+
+    filename[msg.filename_length] = '\0';	
+    printf("Receiving: %s...\n", filename);
 	//load metadata
         byte* rcvMsg = (byte *) malloc(sizeof(byte)*msg.num_bytes);
 
