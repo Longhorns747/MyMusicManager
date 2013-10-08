@@ -100,8 +100,6 @@ void *ThreadMain(void* threadArgs)
         }
 
     }
-
-
 }
 
 void make_socket(int* sock)
@@ -186,16 +184,7 @@ void diff(int sock)
 
     update_files(&serverState);
 
-    int e;
-    printf("\n");
-    for(e = 0; e <serverState.numFiles; e++){
-	printf("server/diff: %s maps to %s\n",serverState.music_files[e].ID, serverState.music_files[e].filename);
-
-
-    }	
-
     rcv_IDs(&clientState, sock);
-    printf("server/diff: The client state currently has %d files\n", clientState.numFiles);
     delta(&clientState, &serverState, &diff);
     send_filenames(&diff, sock);
 }
