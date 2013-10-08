@@ -81,7 +81,7 @@ void send_payload(int size, byte* payload, int sock)
     }
 
     //Send the remainder of the payload
-    if(send(sock, payload + (BUFSIZE*offset), remainingBytes, 0) != remainingBytes)
+    if(send(sock, payload[BUFSIZE*offset], remainingBytes, 0) != remainingBytes)
        perror("send() sent unexpected number of bytes of data");       
 }
 
