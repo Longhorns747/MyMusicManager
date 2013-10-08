@@ -109,7 +109,7 @@ int setup_connection(sockaddr_in* address)
     }
 
     if(connect(clientSock, (struct sockaddr *) address, sizeof(*address)) < 0){
-        printf("connect() failed :(\n");
+        printf("Server is down, slap Ethan! :(\n");
         exit(1);
     }
 
