@@ -37,7 +37,6 @@ int main()
 		
 		//Fill message struct
 		create_message(&msg, 0, userChoice, LAST_PACKET, 0);
-		printf("Created message with type: %d\n", msg.type);
 		send_message(&msg, sock);
 
 		switch(msg.type){
@@ -130,12 +129,13 @@ void pull(int sock)
     send_ids(&currState, sock);
     
     rcv_music_files(sock);	
-    printf("rcv_music_files finished receiving\n");
+    printf("All Done!\n");
 }
 
 void list(int sock)
 {
 	rcv_filenames(sock);
+	printf("All Done!\n");
 }
 
 void diff(int sock)
@@ -144,4 +144,5 @@ void diff(int sock)
 	update_files(&currState);
 	send_ids(&currState, sock);
 	rcv_filenames(sock);
+	printf("All Done!\n");
 }

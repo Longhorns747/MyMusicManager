@@ -151,8 +151,7 @@ void rcv_music_files(int sock)
     	recv(sock, &filename, msg.filename_length, 0);	
 
         filename[msg.filename_length] = '\0';	
-        printf("Receiving: %s %d...\n", filename, msg.num_bytes);
-	    //load metadata
+        printf("Receiving: %s...\n", filename, msg.num_bytes);
         byte* rcvMsg = (byte *) malloc(sizeof(byte)*msg.num_bytes);
 
         int numBytesExpected = msg.num_bytes;
@@ -163,20 +162,14 @@ void rcv_music_files(int sock)
     	//Keep receiving full packets until packet is not full
     	while(totalBytes < (numBytesExpected)){
     	   numBytesRecv = recv(sock, &rcvMsg[totalBytes], remainingBytes, 0);
-           //printf("NumBytesRecv: %d\n", numBytesRecv);
            totalBytes += numBytesRecv;
            remainingBytes -= numBytesRecv;
 	    }
 
-		
-        //Get the last packet expected	
-        //numBytesRecv += recv(sock, &rcvMsg[BUFSIZE*offset], numBytesExpected - numBytesRecv, 0); 
-	    printf("Numbytes received is %d\n", totalBytes);
         //Now we have the whole file. Save it 
         save_file(rcvMsg, msg.num_bytes, filename);
     	//Next we expect a message packet
     	rcv_message(&msg, sock);
-        printf("MsgLast: %d\n", msg.last_message);
     }
 }
 
@@ -211,6 +204,9 @@ void rcv_filenames(int sock)
         memset(filename, 0, msg.num_bytes);
         rcv_message(&msg, sock);
     }
+
+    if(count == 1)
+        printf("All files are the same!\n");
 }
 
 //NOTE TO SELF: what if filestate takes up more than one packet?
