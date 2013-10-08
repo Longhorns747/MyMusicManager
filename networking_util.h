@@ -63,8 +63,6 @@ void rcv_message(message* msg, int sock)
 //Send the entire payload in 1 or more packets
 void send_payload(int size, byte* payload, int sock)
 {
-    byte buffer[BUFSIZE];
-
     int remainingBytes = size;
     int offset = 0;
     int numSent;
@@ -81,7 +79,7 @@ void send_payload(int size, byte* payload, int sock)
     }
 
     //Send the remainder of the payload
-    if(send(sock, payload[BUFSIZE*offset], remainingBytes, 0) != remainingBytes)
+    if(send(sock, &payload[BUFSIZE*offset], remainingBytes, 0) != remainingBytes)
        perror("send() sent unexpected number of bytes of data");       
 }
 
@@ -118,8 +116,6 @@ void send_music_files(filestate* state, int sock)
 
     	stat(filename, &fileAttributes);
     	byte* file = load_file(filename, fileAttributes.st_size); 
-	
-	//printf("ntwkutil/send_music_files: File length is %d\n", 1);
 
     	//create and send metadata message
     	message msg;
@@ -171,7 +167,7 @@ void rcv_music_files(int sock)
 
 		
         //Get the last packet expected	
-        recv(sock, &rcvMsg[BUFSIZE*offset], numBytesExpected - numBytesRecv, 0); 
+        numBytesRecv += recv(sock, &rcvMsg[BUFSIZE*offset], numBytesExpected - numBytesRecv, 0); 
 	printf("Numbytes received is %d\n", numBytesRecv);
         //Now we have the whole file. Save it 
         save_file(rcvMsg, numBytesRecv, filename);
