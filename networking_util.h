@@ -155,7 +155,7 @@ void rcv_music_files(int sock)
     	recv(sock, &filename, msg.filename_length, 0);	
 
     filename[msg.filename_length] = '\0';	
-    printf("Receiving: %s...\n", filename);
+    printf("Receiving: %s %d...\n", filename, msg.num_bytes);
 	//load metadata
         byte* rcvMsg = (byte *) malloc(sizeof(byte)*msg.num_bytes);
 
@@ -163,11 +163,10 @@ void rcv_music_files(int sock)
         int numBytesRecv = 0;
 	int offset = 0;
 
-	
-
     	//Keep receiving full packets until packet is not full
     	while(numBytesRecv < (numBytesExpected-BUFSIZE)){
-    	    numBytesRecv += recv(sock, &rcvMsg[BUFSIZE*offset++], BUFSIZE, 0);
+    	   numBytesRecv += recv(sock, &rcvMsg[BUFSIZE*offset], BUFSIZE, 0);
+           offset++;
 	}
 
 		
