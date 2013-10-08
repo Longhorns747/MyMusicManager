@@ -158,14 +158,15 @@ void rcv_music_files(int sock)
         int numBytesExpected = msg.num_bytes;
         int numBytesRecv = 0;
         int totalBytes = 0;
+        int remainingBytes = numBytesExpected;
 	int offset = 0;
 
     	//Keep receiving full packets until packet is not full
     	while(totalBytes < (numBytesExpected)){
-    	   numBytesRecv = recv(sock, &rcvMsg[totalBytes], BUFSIZE, 0);
+    	   numBytesRecv = recv(sock, &rcvMsg[totalBytes], remainingBytes, 0);
            //printf("NumBytesRecv: %d\n", numBytesRecv);
            totalBytes += numBytesRecv;
-           offset++;
+           remainingBytes -= numBytesRecv;
 	}
 
 		
@@ -176,6 +177,7 @@ void rcv_music_files(int sock)
         save_file(rcvMsg, msg.num_bytes, filename);
     	//Next we expect a message packet
     	rcv_message(&msg, sock);
+        printf("MsgLast: %d\n", msg.last_message);
         
     }
 }
