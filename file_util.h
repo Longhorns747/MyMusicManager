@@ -37,8 +37,7 @@ void save_file(byte* fileBuffer, char* filename)
 }
 
 byte* get_unique_id(char fileName[], off_t fileSize)
-{ 
-	//printf("FILENAME: %s filesize: %d\n", fileName, fileSize);
+{
 	byte* c = (byte *) malloc(sizeof(byte) * MD5_DIGEST_LENGTH);
 	byte* payload;
 	payload = load_file(fileName, fileSize);
@@ -135,20 +134,21 @@ void delta(filestate* receiver, filestate* sender, filestate* res)
 
     for(i = 0; i < senderLength; i++)
     {
-	found = 0;
+	    found = 0;
+        
         for(j = 0; j < receiverLength; j++)
     	{
-	    found = 0;
+	        found = 0;
        	    if(!memcmp(sender->music_files[i].ID, receiver->music_files[j].ID, sizeof(sender->music_files[i].ID))){
-	        found = 1;
-	        break;	
+	            found = 1;
+	            break;	
+	        }
 	    }
-	}
 
-	if(!found){
+	    if(!found){
 	        fileList = (music_file*) realloc(fileList, sizeof(music_file)*(++fileCount));
-                fileList[fileCount-1] = sender->music_files[i];
-	}
+            fileList[fileCount-1] = sender->music_files[i];
+	    }
     }	
     
     for(int i = 0; i < fileCount; i++){

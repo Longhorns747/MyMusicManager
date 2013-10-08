@@ -97,7 +97,7 @@ void send_filenames(filestate* state, int sock)
         create_message(&msg, strlen(filename), -1, NOT_LAST_PACKET, strlen(filename)); //+1 for '/0'?
     	send_message(&msg, sock);
 
-	//send filename
+	    //send filename
         send_payload(msg.num_bytes, filename, sock);
     }
 
@@ -114,19 +114,19 @@ void send_music_files(filestate* state, int sock)
         char* filename = state->music_files[i].filename;
 
     	//grab each file
-	struct stat fileAttributes;
+	    struct stat fileAttributes;
     	stat(filename, &fileAttributes);
     	char* file = load_file(filename, fileAttributes.st_size); 
 
     	//create and send metadata message
     	message msg;
         create_message(&msg,fileAttributes.st_size, -1, NOT_LAST_PACKET, strlen(filename)); //+1?
-	send_message(&msg, sock);
+	    send_message(&msg, sock);
 
         //send the filename payload
-	send_payload(strlen(filename), filename, sock);
+	    send_payload(strlen(filename), filename, sock);
 
-	//send music file
+	    //send music file
         send_payload(fileAttributes.st_size, file, sock);
     }
 
@@ -207,16 +207,15 @@ void rcv_filenames(int sock)
 //NOTE TO SELF: what if filestate takes up more than one packet?
 void send_ids(filestate* state, int sock)
 {	
-    printf("ntwkutil/send_ids: Send IDs is preparing to send IDs\n");
+    
     for(int i = 0; i < state->numFiles; i++){
         char* ID = state->music_files[i].ID;
 
         message msg;
         create_message(&msg, strlen(ID), -1, NOT_LAST_PACKET, 0);
-	send_message(&msg, sock);
+	    send_message(&msg, sock);
 
         send_payload(strlen(ID), ID, sock);
-	printf("ntwkutil/send_ids: Send IDs is sending an ID!\n");
     }
 
     //Make the last message
@@ -265,7 +264,6 @@ void rcv_IDs(filestate* res, int sock)
         rcv_message(&msg, sock);
     }
 
-    printf("ntwkutil/rcv_ids: Rcv_IDS is showing %d files\n", count);
     res->music_files = fileList;
     res->numFiles = count;
 }
